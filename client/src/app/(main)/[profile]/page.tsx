@@ -11,6 +11,7 @@ import { useParams, useRouter } from "next/navigation";
 import { useProfileStore } from "@/stores/profileStore";
 import { useEffect } from "react";
 import FollowButton from "@/components/FollowBtn";
+import { useAuthStore } from "@/stores/authStore";
 
 export default function ProfilePage() {
 
@@ -20,8 +21,8 @@ export default function ProfilePage() {
     const params = useParams();
     const profileHandle = params.profile as string;
 
+    const { user: currentUser } = useAuthStore();
     const { getUserProfile, userProfile, isLoading } = useProfileStore();
-
 
 
     // initially get user profile
@@ -88,6 +89,7 @@ export default function ProfilePage() {
                 /> : <div className="bg-(--hover) w-full" />}
             </div>
 
+
             {/* Profile Info */}
             <div className="px-4">
 
@@ -104,10 +106,12 @@ export default function ProfilePage() {
 
                     <div className="flex items-center gap-2 mt-20">
 
-                        <FollowButton
-                            targetUserId={userProfile?.id}
-                            initialIsFollowing={userProfile?.isFollowing}
-                        />
+                        {currentUser?.userId === userProfile?.id ?
+                            (<button className="surface-btn cursor-pointer" onClick={() => router.push("/edit-profile")}>Edit profile</button>) :
+                            (<FollowButton
+                                targetUserId={userProfile?.id}
+                                initialIsFollowing={userProfile?.isFollowing}
+                            />)}
 
                     </div>
 

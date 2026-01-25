@@ -58,7 +58,7 @@ export const usePostStore = create<PostState>((set, get) => ({
 
         try {
 
-            const response = await api.get(`/posts/foryou/get?page=${forYouPage}&limit=6`);
+            const response = await api.get(`/posts/foryou/get?page=${forYouPage}&limit=10`);
             const { success, data, nextPage } = response?.data || [];
 
             if (success) {
@@ -94,7 +94,7 @@ export const usePostStore = create<PostState>((set, get) => ({
 
         try {
 
-            const response = await api.get(`/posts/following/get?page=${followingPage}&limit=6`);
+            const response = await api.get(`/posts/following/get?page=${followingPage}&limit=10`);
             const { success, data, nextPage } = response?.data || [];
 
             if (success) {

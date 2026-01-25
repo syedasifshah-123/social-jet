@@ -77,6 +77,7 @@ const getUserProfileController = async (req, res, next) => {
                 followingCount: Number(followingCount[0].count),
                 postCount: Number(postCount[0].count),
                 profile: {
+                    userId: profiles?.user_id,
                     avatar: profiles?.avatar,
                     banner: profiles?.banner_img,
                     bio: profiles?.bio,

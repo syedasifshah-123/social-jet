@@ -49,7 +49,7 @@ body {
 @layer components {
 
     .primary-btn {
-        @apply bg-(--button-bg) text-(--button-text) rounded-full h-[45px] py-2 font-medium cursor-pointer
+        @apply bg-(--button-bg) text-(--button-text) rounded-full h-11.25 py-2 font-medium cursor-pointer
     }
 
     .secondary-btn {

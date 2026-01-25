@@ -8,6 +8,7 @@ import { LogOut, Settings, Moon, Sun, ChevronLeft, UserCircle, X } from "lucide-
 import Avatar from "../Avatar";
 import { motion } from "framer-motion";
 import { useModalContext } from "@/context/ModalContext";
+import { useRouter } from "next/navigation";
 
 
 const SidebarProfile = () => {
@@ -17,7 +18,8 @@ const SidebarProfile = () => {
     const [isOpen, setIsOpen] = useState(false);
     const [menuView, setMenuView] = useState<"main" | "theme">("main");
     const { openModal, closeModal } = useModalContext();
-    const [state, setState] = useState("");
+
+    const router = useRouter();
 
 
     const LogoutModal = () => openModal(<>
@@ -82,15 +84,20 @@ const SidebarProfile = () => {
                         /* --- MAIN MENU --- */
                         <div className="flex flex-col">
 
-                            <button className="flex items-center gap-3 px-4 py-3 hover:bg-(--hover) transition text-left font-bold rounded-xl cursor-pointer">
-                                <UserCircle size={20} /> Edit Profile
+                            <button className="flex items-center gap-3 px-4 py-3 hover:bg-(--hover) transition rounded-xl cursor-pointer" onClick={() => {
+                                router.push("/edit-profile");
+                                setIsOpen(false);
+                            }}>
+                                <UserCircle size={20} /> 
+                                <p className="font-medium ">Edit Profile</p>
                             </button>
 
                             <button
                                 onClick={() => setMenuView("theme")}
                                 className="flex items-center gap-3 px-4 py-3 hover:bg-(--hover) transition text-left font-bold rounded-xl cursor-pointer"
                             >
-                                <Settings size={20} /> Preferences
+                                <Settings size={20} /> 
+                                <p className="font-medium">Preferences</p>
                             </button>
 
                             <div className="h-px bg-(--input-border) my-2" />
@@ -100,7 +107,7 @@ const SidebarProfile = () => {
                                     setIsOpen(false);
                                     LogoutModal();
                                 }}
-                                className="flex items-center gap-3 px-4 py-3 hover:bg-(--hover) transition text-left font-bold rounded-xl cursor-pointer text-red-500"
+                                className="flex items-center gap-3 px-4 py-3 hover:bg-(--hover) transition text-left font-medium rounded-xl cursor-pointer text-red-500"
                             >
                                 <LogOut size={20} /> Log out
                             </button>
