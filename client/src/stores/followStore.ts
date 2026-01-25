@@ -15,6 +15,8 @@ export const useFollowStore = create<FollowState>((set) => ({
 
     isLoading: false,
 
+
+    // follow user action
     followUser: async (userId) => {
         set({ isLoading: true });
 
@@ -38,6 +40,9 @@ export const useFollowStore = create<FollowState>((set) => ({
         }
     },
 
+    
+
+    // unfollow user action
     unFollowUser: async (userId) => {
         set({ isLoading: true });
         try {

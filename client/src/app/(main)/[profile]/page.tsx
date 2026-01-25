@@ -107,10 +107,12 @@ export default function ProfilePage() {
                     <div className="flex items-center gap-2 mt-20">
 
                         {currentUser?.userId === userProfile?.id ?
+                            
                             (<button className="surface-btn cursor-pointer" onClick={() => router.push("/edit-profile")}>Edit profile</button>) :
                             (<FollowButton
                                 targetUserId={userProfile?.id}
                                 initialIsFollowing={userProfile?.isFollowing}
+                                username={userProfile?.username}
                             />)}
 
                     </div>
