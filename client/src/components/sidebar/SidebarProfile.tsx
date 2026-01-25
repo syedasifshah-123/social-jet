@@ -17,6 +17,7 @@ const SidebarProfile = () => {
     const [isOpen, setIsOpen] = useState(false);
     const [menuView, setMenuView] = useState<"main" | "theme">("main");
     const { openModal, closeModal } = useModalContext();
+    const [state, setState] = useState("");
 
 
     const LogoutModal = () => openModal(<>
