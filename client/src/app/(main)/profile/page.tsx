@@ -18,26 +18,15 @@ export default function ProfilePage() {
 
     const router = useRouter();
 
-    const params = useParams();
-    const profileHandle = params.profile as string;
-
     const { user: currentUser } = useAuthStore();
     const { getUserProfile, userProfile, isLoading } = useProfileStore();
 
 
     // initially get user profile
     useEffect(() => {
-        if (profileHandle) {
-
-            // remove @ from username
-            const cleanUsername = profileHandle.startsWith('%40')
-                ? profileHandle.replace('%40', '')
-                : profileHandle.replace('@', '');
-
-            getUserProfile(cleanUsername);
-
-        }
-    }, [profileHandle, getUserProfile]);
+        const username = currentUser?.username;
+        getUserProfile(username as string);
+    }, [getUserProfile]);
 
 
 

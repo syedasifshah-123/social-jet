@@ -18,7 +18,7 @@ export const profilesTable = pgTable("profiles", {
     gender: genderEnum("gender").notNull().default("other"),
     location: varchar("location", { length: 100 }),
     country: varchar("country", { length: 100 }),
-    birthdate: date("birthdate"),
+    birthdate: date("birthdate").default("10/20/2000"),
     created_at: timestamp("created_at", { withTimezone: true })
         .defaultNow()
         .notNull(),

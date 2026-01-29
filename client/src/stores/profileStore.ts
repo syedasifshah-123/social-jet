@@ -1,17 +1,20 @@
 import api from "@/config/axios";
-import { ApiErrorResponse } from "@/types/authTypes";
+import { ApiErrorResponse, UserType } from "@/types/authTypes";
 import { ProfileDataType } from "@/types/profileTypes";
 import { showToast } from "@/utils/showToast";
 import { AxiosError } from "axios";
 import { create } from "zustand";
 
+
 interface ProfileState {
 
     isLoading: boolean;
     userData: [],
+    users: UserType[],
     userProfile: any;
 
     getUserProfile: (username: string) => Promise<void>;
+    getAllUsers: () => Promise<void>
     createProfile: (profileData: FormData) => Promise<boolean>;
     updateProfile: (profileData: ProfileDataType) => void;
 
@@ -23,6 +26,7 @@ export const useProfileStore = create<ProfileState>((set, get) => ({
 
     isLoading: false,
     userData: [],
+    users:[],
     userProfile: {},
 
 
@@ -56,23 +60,44 @@ export const useProfileStore = create<ProfileState>((set, get) => ({
     },
 
 
-    createProfile: async (profileData: FormData): Promise<boolean> => {
+
+
+    // GET ALL USER ACTION
+    getAllUsers: async (): Promise<void> => {
+
+        set({ isLoading: true });
+
         try {
-            set({ isLoading: true });
-
-            const response = await api.put("/profile/update", profileData, {
-            });
-
-            const { success, message } = response.data;
-
-            console.log(response)
+            
+            const response = await api.get("/user/all");
+            const { success, data } = response.data;
 
             if (success) {
-                showToast({ type: 'success', message });
+                set({ users: data });
             }
 
-            return success;
+        } catch (err: unknown) {
 
+            const error = err as AxiosError<ApiErrorResponse>;
+            const serverMessage = error?.response?.data?.message;
+            const msg = serverMessage || error.message || "Request failed";
+            showToast({ type: 'error', message: msg });
+
+        } finally {
+            set({ isLoading: false });
+        }
+    },
+
+
+
+    // CREATE PROFILE ACTION
+    createProfile: async (profileData: FormData): Promise<boolean> => {
+        set({ isLoading: true });
+        try {
+            const response = await api.put("/profile/update", profileData);
+            const { success, message } = response.data;
+            if (!success) return false;
+            return success;
         } catch (err: unknown) {
 
             const error = err as AxiosError<ApiErrorResponse>;
@@ -89,6 +114,8 @@ export const useProfileStore = create<ProfileState>((set, get) => ({
     },
 
 
+
+    // UPDATE PROFILE ACTION
     updateProfile: async (profileData: ProfileDataType) => {
         set({ isLoading: true });
     }

@@ -18,15 +18,19 @@ type PostState = {
     isPostLoading: boolean;
 
     forYouPosts: Post[];
-    followingPosts: Post[]
+    followingPosts: Post[];
+    explorePosts: Post[];
 
     forYouHasMore: boolean;
     forYouPage: number;
     followingHasMore: boolean;
     followingPage: number;
+    exploreHasMore: boolean;
+    explorePage: number;
 
     getAllForYouPosts: () => Promise<void>;
     getAllFollowingPosts: () => Promise<void>;
+    getAllExplorePosts: () => Promise<void>;
     createPost: (postData: FormData) => Promise<boolean>;
     addPostToTop: (formData: FormData) => void;
     resetForYou: () => void;
@@ -41,11 +45,14 @@ export const usePostStore = create<PostState>((set, get) => ({
     isPostLoading: false,
     forYouPosts: [],
     followingPosts: [],
+    explorePosts: [],
 
     followingHasMore: true,
     followingPage: 1,
     forYouHasMore: true,
     forYouPage: 1,
+    exploreHasMore: true,
+    explorePage: 1,
 
 
 
@@ -119,6 +126,43 @@ export const usePostStore = create<PostState>((set, get) => ({
 
     },
 
+
+
+
+
+    // GET ALL EXPLORE POSTS ACTION
+    getAllExplorePosts: async (): Promise<void> => {
+
+        const { explorePage, explorePosts, isPostLoading, exploreHasMore } = get();
+        if (isPostLoading || !exploreHasMore) return;
+        set({ isPostLoading: true });
+
+        try {
+
+            const response = await api.get(`/posts/explore/get?page=${explorePage}&limit=10`);
+            const { success, data, nextPage } = response?.data || [];
+
+            if (success) {
+                set({
+                    explorePosts: explorePage === 1 ? data : [...explorePosts, ...data],
+                    explorePage: nextPage ? nextPage : explorePage,
+                    exploreHasMore: nextPage !== null,
+                });
+            }
+
+
+        } catch (err: unknown) {
+
+            const error = err as AxiosError<ApiErrorResponse>;
+            const serverMessage = error?.response?.data?.message;
+            const msg = serverMessage || error.message || "Request failed";
+            showToast({ type: 'error', message: msg });
+
+        } finally {
+            set({ isPostLoading: false });
+        }
+
+    },
 
 
 

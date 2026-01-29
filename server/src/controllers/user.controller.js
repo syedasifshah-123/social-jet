@@ -4,6 +4,7 @@ import { profilesTable } from "../db/schema/Profiles.js";
 import { followsTable } from "../db/schema/Follows.js";
 import { and, eq, sql } from "drizzle-orm";
 import { postsTable } from "../db/index.js";
+import { success } from "zod";
 
 
 
@@ -94,4 +95,34 @@ const getUserProfileController = async (req, res, next) => {
 
 
 
-export { getUserProfileController }
+
+// GET ALL USERS CONTROLLER
+const getAllUsersController = async (req, res, next) => {
+    try {
+
+        const users = await db
+            .select({
+                id: usersTable.user_id,
+                name: usersTable.name,
+                username: usersTable.username,
+                avatar: profilesTable.avatar,
+            })
+            .from(usersTable)
+            .leftJoin(profilesTable, eq(usersTable.user_id, profilesTable.user_id));
+
+        return res.status(200).json({
+            success: true,
+            data: users
+        });
+
+    } catch (err) {
+        console.error("Error in getAllUsersController:", err);
+        next(err);
+    }
+}
+
+
+
+
+
+export { getUserProfileController, getAllUsersController }

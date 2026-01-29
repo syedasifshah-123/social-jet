@@ -74,7 +74,7 @@ const FollowButton = ({ targetUserId, initialIsFollowing, username }: FollowBtnP
                     <button className="secondary-btn w-max px-5" onClick={closeModal}>Cancel</button>
                     <button className="danger-btn" onClick={() => {
                         handleUnfollow();
-                        closeModal();
+                        closeModal(); 
                     }}>Unfollow</button>
                 </div>
 

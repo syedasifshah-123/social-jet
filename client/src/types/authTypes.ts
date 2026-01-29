@@ -55,3 +55,13 @@ export interface ConfirmResetPasswordType {
 export interface ApiErrorResponse {
     message: string;
 }
+
+
+
+// all User type
+export interface UserType {
+    id: string;
+    name: string;
+    username: string;
+    avatar: string;
+}

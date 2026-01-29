@@ -39,7 +39,10 @@ const SidebarProfile = () => {
                     
                     <button className="secondary-btn w-max px-3" onClick={closeModal}>Cancel</button>
 
-                    <button className="danger-btn" onClick={handleLogout}>Logout</button>
+                    <button className="danger-btn" onClick={() => {
+                        handleLogout();
+                        closeModal();
+                    }}>Logout</button>
 
                 </div>
 

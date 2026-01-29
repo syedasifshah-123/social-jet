@@ -1,9 +1,11 @@
-import { eq, inArray, desc, gte, and, notInArray, ne, or } from "drizzle-orm";
+import { eq, inArray, desc, gte, and, notInArray, ne, or, sql } from "drizzle-orm";
 import { db } from "../db/config.js";
 import { followsTable } from "../db/schema/Follows.js";
 import { postsTable } from "../db/schema/Posts.js";
 import { usersTable } from "../db/schema/Users.js";
 import { profilesTable } from "../db/schema/Profiles.js";
+import { likesTable } from "../db/schema/Likes.js";
+import { number } from "zod";
 
 
 
@@ -130,7 +132,7 @@ const getAllFollowingPostsController = async (req, res, next) => {
             .orderBy(desc(postsTable.created_at))
             .limit(limit)
             .offset(offset);
-        
+
 
         // Response
         res.status(200).json({
@@ -144,6 +146,59 @@ const getAllFollowingPostsController = async (req, res, next) => {
         next(err);
     }
 };
+
+
+
+
+
+// GET ALL EXPLORE POST CONTROLLER
+const getAllExplorePostsController = async (req, res, next) => {
+    try {
+
+        const { user_id: userId } = req.user;
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 10;
+        const offset = (page - 1) * limit;
+
+
+        const explorePosts = await db
+            .select({
+                post_id: postsTable.post_id,
+                content: postsTable.content,
+                media_url: postsTable.media_url,
+                created_at: postsTable.created_at,
+                user: {
+                    name: usersTable.name,
+                    username: usersTable.username,
+                    avatar: profilesTable.avatar,
+                },
+                // Count nikalne ke liye sahi subquery
+                // likeCount: sql <number> `(SELECT count(*) FROM ${likesTable} WHERE ${likesTable.post_id} = ${postsTable.post_id})`.as('like_count')
+            })
+            .from(postsTable)
+            .leftJoin(usersTable, eq(postsTable.user_id, usersTable.user_id))
+            .leftJoin(profilesTable, eq(postsTable.user_id, profilesTable.user_id))
+            .where(ne(postsTable.user_id, userId))
+            .orderBy((t) => [
+                // Alias ki jagah poori subquery dobara likhni padti hai ya Drizzle ka tareeka:
+                // desc(sql`(SELECT count(*) FROM ${likesTable} WHERE ${likesTable.post_id} = ${postsTable.post_id})`),
+                desc(postsTable.created_at)
+            ])
+            .limit(limit)
+            .offset(offset);
+
+        res.status(200).json({
+            success: true,
+            data: explorePosts,
+            nextPage: explorePosts.length === limit ? page + 1 : null
+        });
+
+    } catch (err) {
+        console.error("Explore Feed Error:", err);
+        next(err);
+    }
+};
+
 
 
 
@@ -334,6 +389,7 @@ const deletePostController = async (req, res, next) => {
 export {
     getAllForYouPostsController,
     getAllFollowingPostsController,
+    getAllExplorePostsController,
     getPostDetailController,
     createPostController,
     editPostController,

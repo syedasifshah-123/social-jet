@@ -49,7 +49,7 @@ const PostCard = ({
 
                 {/* Header */}
                 <div className="flex items-center gap-2 text-sm">
-                    <Link href={username} className="font-semibold text-(--text-color) text-[17px]">{name}</Link>
+                    <Link href={username} className="font-semibold text-(--text-color) text-[17px] hover:underline">{name}</Link>
                     <span className="text-(--secondary-text) text-[16px]">· {username}</span>
                     <span className="text-(--secondary-text)">· {useTimeAgo(time)}</span>
                 </div>

@@ -127,6 +127,7 @@ const CreateProfile = () => {
 
             if (success) {
                 await useAuthStore.getState().checkAuth();
+                showToast({ type: "success", message: "Profile created scuccessfull!" });
                 router.push("/home");
             } else {
                 return;
