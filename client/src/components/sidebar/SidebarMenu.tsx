@@ -28,7 +28,7 @@ const menuItems: MenuItems[] = [
     { label: "Home", icon: Home, path: "/home" },
     { label: "Explore", icon: Search, path: "/explore" },
     { label: "Notifications", icon: Bell, path: "/notifications" },
-    { label: "Follow", icon: UserPlus, path: "/follows" },
+    { label: "Follow", icon: UserPlus, path: "/connect_people" },
     { label: "Chat", icon: MessageCircle, path: "/chat" },
     { label: "Grok", icon: Sparkles, path: "/grok" },
     { label: "Bookmarks", icon: Bookmark, path: "/bookmarks" },

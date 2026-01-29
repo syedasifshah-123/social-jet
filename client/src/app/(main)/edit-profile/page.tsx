@@ -98,6 +98,7 @@ const EditProfilePage = () => {
 
 
     return (
+
         <form className="px-5 py-5 max-w-2xl mx-auto" onSubmit={handleSubmit}>
             <h1 className="text-[22px] font-medium">Edit Profile</h1>
 

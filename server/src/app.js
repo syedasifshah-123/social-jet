@@ -16,6 +16,7 @@ import { profileRoutes } from "./routes/profile.routes.js";
 import { postRoutes } from "./routes/post.routes.js";
 import { userRoutes } from "./routes/user.routes.js";
 import { followRoutes } from "./routes/follow.routes.js";
+import { connectPeopleRoutes } from "./routes/connectPeople.routes.js";
 
 
 // EXPRESS SERVER
@@ -65,6 +66,8 @@ app.use("/api/posts", postRoutes);
 app.use("/api/user", userRoutes);
 // FOLLOWS ROUTE
 app.use("/api/follows", followRoutes);
+// CONNECT WITH TOP PEOPLES
+app.use("/api/peoples", connectPeopleRoutes);
 
 
 

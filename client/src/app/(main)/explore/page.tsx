@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import ExplorePostsList from "@/components/posts/ExplorePostsList";
 import { useProfileStore } from "@/stores/profileStore";
 import { UserType } from "@/types/authTypes";
+import Image from "next/image";
 
 const ExplorePage = () => {
 
@@ -85,7 +86,7 @@ const ExplorePage = () => {
                                 setSearchTerm(e.target.value);
                                 setShowResults(true);
                             }}
-                            className="w-full py-2.5 pl-11 pr-5 bg-(--hover)/20 border border-(--input-border) outline-none rounded-full focus:ring-1 focus:ring-blue-500 transition-all"
+                            className="w-full py-2.5 pl-11 pr-5 bg-(--hover)/20 border border-(--input-border) outline-none rounded-full focus:ring-1 focus:ring-(--button-bg) transition-all"
                         />
 
                         <Search className="absolute left-4 top-3 w-5 text-gray-500" />
@@ -110,9 +111,11 @@ const ExplorePage = () => {
                                                     }}
                                                     className="flex items-center gap-3 px-4 py-3 hover:bg-(--hover)/40 cursor-pointer transition-all rounded-xl"
                                                 >
-                                                    <img
+                                                    <Image
                                                         src={user.avatar || "/default-avatar.png"}
                                                         alt={user.name}
+                                                        width={48}
+                                                        height={48}
                                                         className="w-12 h-12 rounded-full object-cover border border-(--input-border)"
                                                     />
 

@@ -65,3 +65,16 @@ export interface UserType {
     username: string;
     avatar: string;
 }
+
+
+
+// TOP PEOPLES
+export interface TopPeoples {
+    id: string;
+    name: string;
+    username: string;
+    bio: string;
+    avatar: string;
+    followersCount: number;
+    isFollowing: boolean;
+}
