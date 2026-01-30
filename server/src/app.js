@@ -71,6 +71,8 @@ app.use("/api/follows", followRoutes);
 app.use("/api/peoples", connectPeopleRoutes);
 // LIKE ROUTES
 app.use("/api/likes", likeRoutes);
+// BOOKMARK ROUTES
+app.use("/api/bookmarks", likeRoutes);
 
 
 

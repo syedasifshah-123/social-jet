@@ -59,8 +59,8 @@ const postUnLikeController = async (req, res, next) => {
 
         await db.delete(likesTable).where(
             and(
-                eq(likesTable.user_id, userId), // Correct
-                eq(likesTable.post_id, postId)  // Correct: postsTable ki jagah likesTable likhein
+                eq(likesTable.user_id, userId),
+                eq(likesTable.post_id, postId)
             )
         );
 
