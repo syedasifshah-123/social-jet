@@ -1,49 +1,43 @@
 "use client";
 
+
+
 import { useEffect } from 'react';
 import PostCard from './PostCard';
-import { usePostStore } from '@/stores/postStore';
-import { Loader, UserX2Icon } from 'lucide-react';
-import { useInView } from 'react-intersection-observer';
+import { BookmarkX, Loader } from 'lucide-react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
 import { useBookmarkStore } from '@/stores/bookmarkStore';
+import { usePathname } from 'next/navigation';
 
 
 
 const BookmarkPostsList = () => {
 
-    const { getBookmarkedPosts, bookmarkPosts, isLoading } = useBookmarkStore();
+    const { getBookmarkedPosts, bookmarkPosts, isPostsLoading } = useBookmarkStore(); 4
     const pathname = usePathname();
 
-
-    // if the scroll view is reached 50%
-    const { ref, inView } = useInView({
-        threshold: 0.5, // trigger
-    });
-
-    // initially fetch
     useEffect(() => {
 
-        const refreshData = async () => {
-            // 1. Pehle purani state reset karein
-            usePostStore.getState().resetFollowing();
+        if (pathname !== "/bookmarks") return;
 
-            // 2. Phir nayi API call karein
+        const refreshData = async () => {
             await getBookmarkedPosts();
         };
 
         refreshData();
 
-    }, []);
+    }, [pathname]);
 
 
-    // If user scroll the page and reached the page 50% then fetch more posts
-    // useEffect(() => {
-    //     if (inView && exploreHasMore && !isPostLoading) {
-    //         getAllExplorePosts();
-    //     }
-    // }, [inView, exploreHasMore, isPostLoading, getAllExplorePosts]);
+    if (!isPostsLoading && bookmarkPosts.length === 0) {
+        return <div className='flex items-center justify-center mt-50'>
+            <div className="flex flex-col gap-5">
+                <BookmarkX size={50} color='var(--secondary-text)' className='mx-auto' />
+                <p className='text-(--secondary-text) text-[18px]'>You've no bookmarks.</p>
+                <Link href="/explore" className='surface-btn w-max mx-auto'>Explore</Link>
+            </div>
+        </div>
+    }
 
 
     return (
@@ -69,15 +63,11 @@ const BookmarkPostsList = () => {
 
 
             {/* --- SENTINEL ELEMENT --- */}
-            <div ref={ref} className="h-20 flex justify-center items-center">
+            <div className="h-20 flex justify-center items-center">
 
-                {isLoading && (
+                {isPostsLoading && (
                     <Loader className="animate-spin" color='var(--button-bg)' />
                 )}
-
-                {/* {explorePosts.length > 0 && (
-                    <p className="text-gray-500 text-sm py-4">You've reached the end! 🎉</p>
-                )} */}
 
             </div>
         </div>

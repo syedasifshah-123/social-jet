@@ -8,6 +8,6 @@ export const bookMarkRoutes = express.Router();
 
 
 
-bookMarkRoutes.get("/saved-all", authMiddleware, getBookmarkedPostsController);
+bookMarkRoutes.get("/saved", authMiddleware, getBookmarkedPostsController);
 bookMarkRoutes.post("/:postId/save", authMiddleware, postSaveController);
 bookMarkRoutes.delete("/:postId/unsave", authMiddleware, postUnSaveController);

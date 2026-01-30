@@ -7,8 +7,10 @@ import { create } from "zustand";
 interface BookmarkState {
 
     isLoading: boolean;
+    isPostsLoading: boolean;
     bookmarkPosts: [];
 
+    // removeBookmarkOptimistic: (postId: string) => void;
     savePost: (id: string) => Promise<boolean>;
     unSavePost: (id: string) => Promise<boolean>;
     getBookmarkedPosts: () => Promise<void>;
@@ -17,10 +19,12 @@ interface BookmarkState {
 
 
 
-export const useBookmarkStore = create<BookmarkState>((set) => ({
+export const useBookmarkStore = create<BookmarkState>((set, get) => ({
 
     isLoading: false,
+    isPostsLoading: false,
     bookmarkPosts: [],
+
 
 
     // POST SAVE ACTION
@@ -52,6 +56,14 @@ export const useBookmarkStore = create<BookmarkState>((set) => ({
     // POST UNSAVE ACTION
     unSavePost: async (id: string): Promise<boolean> => {
 
+        const previousPosts = get().bookmarkPosts;
+
+        // Optimistic update
+        set((state) => ({
+            bookmarkPosts: state.bookmarkPosts.filter((post: any) => post.post_id !== id)
+        }));
+
+
         set({ isLoading: true });
 
         try {
@@ -60,6 +72,7 @@ export const useBookmarkStore = create<BookmarkState>((set) => ({
             const { success } = response.data;
 
             if (!success) {
+                set({ bookmarkPosts: previousPosts });
                 return false;
             }
 
@@ -67,6 +80,7 @@ export const useBookmarkStore = create<BookmarkState>((set) => ({
 
         } catch (err: any) {
             showToast({ type: 'error', message: err?.response?.data?.message || "Unbookmark failed" });
+            set({ bookmarkPosts: previousPosts });
             return false;
         } finally {
             set({ isLoading: false });
@@ -77,12 +91,12 @@ export const useBookmarkStore = create<BookmarkState>((set) => ({
 
     // get saved post action
     getBookmarkedPosts: async (): Promise<void> => {
-        
-        set({ isLoading: true });
-        
+
+        set({ isPostsLoading: true });
+
         try {
 
-            const response = await api.get("/bookmarks/saved-all");
+            const response = await api.get("/bookmarks/saved");
             const { success, data } = response.data;
 
             if (success) {
@@ -92,7 +106,7 @@ export const useBookmarkStore = create<BookmarkState>((set) => ({
         } catch (err: any) {
             showToast({ type: 'error', message: err?.response?.data?.message || "Unbookmark failed" });
         } finally {
-            set({ isLoading: false });
+            set({ isPostsLoading: false });
         }
     }
 
