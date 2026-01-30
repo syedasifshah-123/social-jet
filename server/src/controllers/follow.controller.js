@@ -25,6 +25,7 @@ const followUserController = async (req, res, next) => {
                 eq(followsTable.follower_id, followerId),
                 eq(followsTable.following_id, userIdToFollow)),
         });
+        
 
         if (existing) {
             return res.status(400).json({ success: false, message: "Already following this user" });

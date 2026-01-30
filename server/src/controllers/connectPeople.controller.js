@@ -10,7 +10,7 @@ import { db } from "../db/config.js";
 const getConnectionPeopleController = async (req, res, next) => {
     try {
 
-        const currentUserId = req.user.user_id; // Auth middleware se user ID lein
+        const { user_id: currentUserId } = req.user; // Auth middleware se user ID lein
 
         const topUsers = await db
             .select({
@@ -34,7 +34,12 @@ const getConnectionPeopleController = async (req, res, next) => {
             .orderBy(desc(sql`count(${followsTable.following_id})`))
             .limit(10);
 
-        return res.status(200).json({ success: true, data: topUsers });
+
+        return res.status(200).json({
+            success: true,
+            data: topUsers
+        });
+
     } catch (err) {
         next(err);
     }
