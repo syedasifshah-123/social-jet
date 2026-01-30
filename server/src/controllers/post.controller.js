@@ -14,9 +14,8 @@ import { number } from "zod";
 const getAllForYouPostsController = async (req, res, next) => {
     try {
 
-        const { user_id: userId } = req.user; // current user id
+        const { user_id: userId } = req.user;
 
-        // Pagination Params
         const page = parseInt(req.query.page) || 1;
         const limit = parseInt(req.query.limit) || 10;
         const offset = (page - 1) * limit;
@@ -29,19 +28,17 @@ const getAllForYouPostsController = async (req, res, next) => {
             .where(eq(followsTable.follower_id, userId));
 
 
-        // all following ID's
         const followingIds = followingData.map((f) => f.followingId);
-
 
         const whereClause = followingIds.length > 0
             ? or(
-                inArray(postsTable.user_id, followingIds), // Jinhe follow kiya unki posts
-                and(
-                    notInArray(postsTable.user_id, [...followingIds, userId]) // Discovery posts
-                )
+                inArray(postsTable.user_id, followingIds),
+                notInArray(postsTable.user_id, [...followingIds, userId])
             )
-            : ne(postsTable.user_id, userId); // Agar koi following nahi hai to sirf apni hide karein
+            : ne(postsTable.user_id, userId);
 
+
+        // 2. Feed Posts with Likes Count and IsLiked Status
         const feedPosts = await db
             .select({
                 post_id: postsTable.post_id,
@@ -53,6 +50,17 @@ const getAllForYouPostsController = async (req, res, next) => {
                     username: usersTable.username,
                     avatar: profilesTable.avatar,
                 },
+                // LIKES COUNT
+                likesCount: sql` (
+                    SELECT count(*) FROM ${likesTable} 
+                    WHERE ${likesTable.post_id} = ${postsTable.post_id}
+                )`.mapWith(Number),
+                // IS LIKED BY CURRENT USER
+                isLiked: sql` EXISTS (
+                    SELECT 1 FROM ${likesTable} 
+                    WHERE ${likesTable.post_id} = ${postsTable.post_id} 
+                    AND ${likesTable.user_id} = ${userId}
+                )`.mapWith(Boolean),
             })
             .from(postsTable)
             .leftJoin(usersTable, eq(postsTable.user_id, usersTable.user_id))
@@ -62,11 +70,9 @@ const getAllForYouPostsController = async (req, res, next) => {
             .limit(limit)
             .offset(offset);
 
-        // 3. Response
         res.status(200).json({
             success: true,
             data: feedPosts,
-            // Agar posts ki tadad limit ke barabar hai, matlab mazeed posts ho sakti hain
             nextPage: feedPosts.length === limit ? page + 1 : null
         });
 
@@ -75,6 +81,7 @@ const getAllForYouPostsController = async (req, res, next) => {
         next(err);
     }
 };
+
 
 
 
@@ -119,6 +126,16 @@ const getAllFollowingPostsController = async (req, res, next) => {
                 content: postsTable.content,
                 media_url: postsTable.media_url,
                 created_at: postsTable.created_at,
+                likesCount: sql` (
+                    SELECT count(*) FROM ${likesTable} 
+                    WHERE ${likesTable.post_id} = ${postsTable.post_id}
+                )`.mapWith(Number),
+                // IS LIKED BY CURRENT USER
+                isLiked: sql` EXISTS (
+                    SELECT 1 FROM ${likesTable} 
+                    WHERE ${likesTable.post_id} = ${postsTable.post_id} 
+                    AND ${likesTable.user_id} = ${userId}
+                )`.mapWith(Boolean),
                 user: {
                     name: usersTable.name,
                     username: usersTable.username,
@@ -167,13 +184,21 @@ const getAllExplorePostsController = async (req, res, next) => {
                 content: postsTable.content,
                 media_url: postsTable.media_url,
                 created_at: postsTable.created_at,
+                likesCount: sql` (
+                    SELECT count(*) FROM ${likesTable} 
+                    WHERE ${likesTable.post_id} = ${postsTable.post_id}
+                )`.mapWith(Number),
+                // IS LIKED BY CURRENT USER
+                isLiked: sql` EXISTS (
+                    SELECT 1 FROM ${likesTable} 
+                    WHERE ${likesTable.post_id} = ${postsTable.post_id} 
+                    AND ${likesTable.user_id} = ${userId}
+                )`.mapWith(Boolean),
                 user: {
                     name: usersTable.name,
                     username: usersTable.username,
                     avatar: profilesTable.avatar,
                 },
-                // Count nikalne ke liye sahi subquery
-                // likeCount: sql <number> `(SELECT count(*) FROM ${likesTable} WHERE ${likesTable.post_id} = ${postsTable.post_id})`.as('like_count')
             })
             .from(postsTable)
             .leftJoin(usersTable, eq(postsTable.user_id, usersTable.user_id))

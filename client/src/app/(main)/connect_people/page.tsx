@@ -5,7 +5,7 @@ import FollowButton from "@/components/FollowBtn";
 import { useAuthStore } from "@/stores/authStore";
 import { useConnectPeopleStore } from "@/stores/connectPeople.store";
 import { TopPeoples } from "@/types/authTypes";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Loader } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
@@ -14,7 +14,7 @@ const ConnectPeople = () => {
 
 
     const router = useRouter();
-    const { topPeoples, getTopPeoplesToConnect } = useConnectPeopleStore();
+    const { topPeoples, getTopPeoplesToConnect, isLoading } = useConnectPeopleStore();
 
 
     // get current user
@@ -55,7 +55,7 @@ const ConnectPeople = () => {
                 <div className="mt-5 w-full flex flex-col items-center justify-between">
 
                     {/* User card */}
-                    {topPeoples.map((p: TopPeoples) => {
+                    {isLoading ? <Loader className="animate-spin duration-100 mt-10" color="var(--button-bg)" size={25} /> : topPeoples.map((p: TopPeoples) => {
 
                         // If current user then skip    
                         if (p.id === currentUser?.userId) return null;

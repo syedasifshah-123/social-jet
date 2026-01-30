@@ -57,14 +57,6 @@ const postUnLikeController = async (req, res, next) => {
         const { postId } = req.params;
 
 
-        // delete like from db
-        // await db.delete(likesTable).where(
-        //     and(
-        //         eq(likesTable.user_id, userId),
-        //         eq(likesTable.post_id, postId)
-        //     )
-        // );
-
         await db.delete(likesTable).where(
             and(
                 eq(likesTable.user_id, userId), // Correct

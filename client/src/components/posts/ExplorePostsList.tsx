@@ -6,10 +6,13 @@ import { usePostStore } from '@/stores/postStore';
 import { Loader, UserX2Icon } from 'lucide-react';
 import { useInView } from 'react-intersection-observer';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 
 const ExplorePostsList = () => {
 
     const { getAllExplorePosts, explorePosts, isPostLoading, exploreHasMore } = usePostStore();
+    const pathname = usePathname();
+
 
     // if the scroll view is reached 50%
     const { ref, inView } = useInView({
@@ -27,7 +30,7 @@ const ExplorePostsList = () => {
         };
 
         refreshData();
-    }, []);
+    }, [pathname]);
 
 
     // If user scroll the page and reached the page 50% then fetch more posts
@@ -45,12 +48,15 @@ const ExplorePostsList = () => {
             {explorePosts?.map((post: any) => (
                 <PostCard
                     key={post.post_id}
+                    postId={post.post_id}
                     avatar={post?.user?.avatar}
                     name={post?.user?.name}
                     username={`@${post?.user?.username}`}
                     time={post.created_at}
                     content={post.content}
                     media={post.media_url}
+                    initialLikesCount={post.likesCount}
+                    initialIsLiked={post.isLiked}
                 />
             ))}
 
