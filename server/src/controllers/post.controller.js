@@ -6,6 +6,7 @@ import { usersTable } from "../db/schema/Users.js";
 import { profilesTable } from "../db/schema/Profiles.js";
 import { likesTable } from "../db/schema/Likes.js";
 import { number } from "zod";
+import { bookmarksTable } from "../db/schema/Bookmarks.js";
 
 
 
@@ -61,6 +62,9 @@ const getAllForYouPostsController = async (req, res, next) => {
                     WHERE ${likesTable.post_id} = ${postsTable.post_id} 
                     AND ${likesTable.user_id} = ${userId}
                 )`.mapWith(Boolean),
+                // bookmark count
+                bookmarkCount: sql`(SELECT count(*) FROM ${bookmarksTable} WHERE ${bookmarksTable.post_id} = ${postsTable.post_id})`.mapWith(Number),
+                isBookmarked: sql`EXISTS (SELECT 1 FROM ${bookmarksTable} WHERE ${bookmarksTable.post_id} = ${postsTable.post_id} AND ${bookmarksTable.user_id} = ${userId})`.mapWith(Boolean)
             })
             .from(postsTable)
             .leftJoin(usersTable, eq(postsTable.user_id, usersTable.user_id))
@@ -136,6 +140,8 @@ const getAllFollowingPostsController = async (req, res, next) => {
                     WHERE ${likesTable.post_id} = ${postsTable.post_id} 
                     AND ${likesTable.user_id} = ${userId}
                 )`.mapWith(Boolean),
+                bookmarkCount: sql`(SELECT count(*) FROM ${bookmarksTable} WHERE ${bookmarksTable.post_id} = ${postsTable.post_id})`.mapWith(Number),
+                isBookmarked: sql`EXISTS (SELECT 1 FROM ${bookmarksTable} WHERE ${bookmarksTable.post_id} = ${postsTable.post_id} AND ${bookmarksTable.user_id} = ${userId})`.mapWith(Boolean),
                 user: {
                     name: usersTable.name,
                     username: usersTable.username,
@@ -173,6 +179,7 @@ const getAllExplorePostsController = async (req, res, next) => {
     try {
 
         const { user_id: userId } = req.user;
+
         const page = parseInt(req.query.page) || 1;
         const limit = parseInt(req.query.limit) || 10;
         const offset = (page - 1) * limit;
@@ -194,6 +201,8 @@ const getAllExplorePostsController = async (req, res, next) => {
                     WHERE ${likesTable.post_id} = ${postsTable.post_id} 
                     AND ${likesTable.user_id} = ${userId}
                 )`.mapWith(Boolean),
+                bookmarkCount: sql`(SELECT count(*) FROM ${bookmarksTable} WHERE ${bookmarksTable.post_id} = ${postsTable.post_id})`.mapWith(Number),
+                isBookmarked: sql`EXISTS (SELECT 1 FROM ${bookmarksTable} WHERE ${bookmarksTable.post_id} = ${postsTable.post_id} AND ${bookmarksTable.user_id} = ${userId})`.mapWith(Boolean),
                 user: {
                     name: usersTable.name,
                     username: usersTable.username,
@@ -205,8 +214,6 @@ const getAllExplorePostsController = async (req, res, next) => {
             .leftJoin(profilesTable, eq(postsTable.user_id, profilesTable.user_id))
             .where(ne(postsTable.user_id, userId))
             .orderBy((t) => [
-                // Alias ki jagah poori subquery dobara likhni padti hai ya Drizzle ka tareeka:
-                // desc(sql`(SELECT count(*) FROM ${likesTable} WHERE ${likesTable.post_id} = ${postsTable.post_id})`),
                 desc(postsTable.created_at)
             ])
             .limit(limit)

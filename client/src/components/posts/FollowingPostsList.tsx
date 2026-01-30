@@ -67,6 +67,8 @@ const FollowingPostList = ({ tab }: { tab: string }) => {
                     media={post.media_url}
                     initialLikesCount={post.likesCount}
                     initialIsLiked={post.isLiked}
+                    initialBookmarkCount={post.bookmarkCount}
+                    initialIsBookmarked={post.isBookmarked}
                 />
             ))}
 

@@ -149,6 +149,7 @@ import Avatar from "../Avatar";
 import { useTimeAgo } from "@/hooks/useTimeAgo";
 import Link from "next/link";
 import { useLikeStore } from "@/stores/likeStore";
+import { useBookmarkStore } from "@/stores/bookmarkStore";
 
 type PostCardProps = {
     postId: string; // Added postId
@@ -159,8 +160,10 @@ type PostCardProps = {
     content: string;
     media?: string;
     verified?: boolean;
-    initialLikesCount: number; // Added count
-    initialIsLiked: boolean;   // Added state
+    initialLikesCount: number;
+    initialIsLiked: boolean;
+    initialBookmarkCount: number;
+    initialIsBookmarked: boolean;
 };
 
 const PostCard = ({
@@ -173,34 +176,44 @@ const PostCard = ({
     media,
     initialLikesCount,
     initialIsLiked,
+    initialBookmarkCount,
+    initialIsBookmarked
 }: PostCardProps) => {
 
     const { likePost, unLikePost } = useLikeStore();
+    const { savePost, unSavePost } = useBookmarkStore();
 
     // Local states for instant feedback
-    const [liked, setLiked] = useState(initialIsLiked);
-    const [count, setCount] = useState(initialLikesCount);
-    const [isLiking, setIsLiking] = useState(false);
+    const [liked, setLiked] = useState<boolean>(initialIsLiked);
+    const [count, setCount] = useState<number>(initialLikesCount);
+    const [isLiking, setIsLiking] = useState<boolean>(false);
+
+
+
+    // local bookmark states
+    const [bookmarked, setBookmarked] = useState<boolean>(initialIsBookmarked);
+    const [bookmarkCount, setBookmarkCount] = useState<number>(initialBookmarkCount);
+    const [isBookmarking, setIsBookmarking] = useState<boolean>(false);
+
 
     // Toggle Like Logic
     const handleLikeToggle = async (e: React.MouseEvent) => {
-        e.stopPropagation(); // Card click se bachane ke liye
+        e.stopPropagation();
         if (isLiking) return;
 
         setIsLiking(true);
         const originalLiked = liked;
         const originalCount = count;
 
-        // Optimistic UI update (pehle update kar do)
+        // Optimistic UI update
         setLiked(!originalLiked);
         setCount(originalLiked ? originalCount - 1 : originalCount + 1);
 
         try {
-            const success = originalLiked
-                ? await unLikePost(postId)
-                : await likePost(postId);
 
+            const success = originalLiked ? await unLikePost(postId) : await likePost(postId);
             if (!success) throw new Error();
+
         } catch (err) {
             // Rollback agar fail ho jaye
             setLiked(originalLiked);
@@ -210,8 +223,39 @@ const PostCard = ({
         }
     };
 
+
+
+    // Handle bookmark
+    const handleBookmarkToggle = async (e: React.MouseEvent) => {
+        e.stopPropagation();
+        if (isBookmarking) return;
+
+        setIsBookmarking(true);
+        const originalBookmark = bookmarked;
+        const originalBookmarkCount = bookmarkCount;
+
+        setBookmarked(!originalBookmark);
+        setBookmarkCount(originalBookmark ? originalBookmarkCount - 1 : originalBookmarkCount + 1);
+
+        try {
+
+            const success = originalBookmark ? await unSavePost(postId) : await savePost(postId);
+            if (!success) throw new Error();
+
+        } catch (err) {
+            // Rollback agar fail ho jaye
+            setBookmarked(originalBookmark);
+            setBookmarkCount(bookmarkCount);
+        } finally {
+            setIsBookmarking(false);
+        }
+
+    }
+
+
     return (
         <div className="flex gap-3 px-4 py-3 border-b border-(--input-border) hover:bg-(--hover)/50 transition cursor-pointer">
+
             <div className="w-10 h-10">
                 <Avatar userAvatar={avatar} />
             </div>
@@ -255,11 +299,19 @@ const PostCard = ({
                     </div>
 
                     {/* Bookmark Button */}
-                    <div className="group flex items-center gap-1 cursor-pointer transition-all">
-                        <div className="w-8 h-8 flex items-center justify-center rounded-full group-hover:bg-yellow-500/10 group-hover:text-yellow-500">
-                            <Bookmark size={18} />
+                    <div
+                        className={`group flex items-center gap-1 cursor-pointer transition-all ${bookmarked ? "text-yellow-500" : "text-(--secondary-text)"}`}
+                        onClick={handleBookmarkToggle}
+                    >
+                        <div className="w-8 h-8 flex items-center justify-center rounded-full group-hover:bg-yellow-500/10 transition-all">
+                            <Bookmark
+                                size={18}
+                                className={`transition-all ${bookmarked ? "fill-yellow-500 text-yellow-500" : ""}`}
+                            />
                         </div>
+                        <span className="text-xs">{bookmarkCount > 0 ? bookmarkCount : ""}</span>
                     </div>
+
 
                     {/* Share Button */}
                     <div className="group flex items-center gap-1 cursor-pointer transition-all">
@@ -267,6 +319,7 @@ const PostCard = ({
                             <Share size={18} />
                         </div>
                     </div>
+
                 </div>
             </div>
         </div>

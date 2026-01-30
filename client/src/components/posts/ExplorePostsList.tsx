@@ -21,6 +21,9 @@ const ExplorePostsList = () => {
 
     // initially fetch
     useEffect(() => {
+
+        if (pathname !== "/explore") return;
+
         const refreshData = async () => {
             // 1. Pehle purani state reset karein
             usePostStore.getState().resetFollowing();
@@ -30,6 +33,7 @@ const ExplorePostsList = () => {
         };
 
         refreshData();
+
     }, [pathname]);
 
 
@@ -57,6 +61,8 @@ const ExplorePostsList = () => {
                     media={post.media_url}
                     initialLikesCount={post.likesCount}
                     initialIsLiked={post.isLiked}
+                    initialBookmarkCount={post.bookmarkCount}
+                    initialIsBookmarked={post.isBookmarked}
                 />
             ))}
 

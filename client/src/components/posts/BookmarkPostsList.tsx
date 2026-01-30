@@ -3,52 +3,59 @@
 import { useEffect } from 'react';
 import PostCard from './PostCard';
 import { usePostStore } from '@/stores/postStore';
-import { Loader } from 'lucide-react';
+import { Loader, UserX2Icon } from 'lucide-react';
 import { useInView } from 'react-intersection-observer';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+import { useBookmarkStore } from '@/stores/bookmarkStore';
 
-const ForYouPostsList = ({ tab }: { tab: string }) => {
 
-    const { getAllForYouPosts, forYouPosts, isPostLoading, forYouHasMore } = usePostStore();
+
+const BookmarkPostsList = () => {
+
+    const { getBookmarkedPosts, bookmarkPosts, isLoading } = useBookmarkStore();
+    const pathname = usePathname();
+
 
     // if the scroll view is reached 50%
     const { ref, inView } = useInView({
         threshold: 0.5, // trigger
     });
 
-
     // initially fetch
     useEffect(() => {
+
         const refreshData = async () => {
             // 1. Pehle purani state reset karein
-            usePostStore.getState().resetForYou();
+            usePostStore.getState().resetFollowing();
 
             // 2. Phir nayi API call karein
-            await getAllForYouPosts();
+            await getBookmarkedPosts();
         };
 
         refreshData();
-    }, [tab]);
+
+    }, []);
 
 
     // If user scroll the page and reached the page 50% then fetch more posts
-    useEffect(() => {
-        if (inView && forYouHasMore && !isPostLoading) {
-            getAllForYouPosts();
-        }
-    }, [inView, forYouHasMore, isPostLoading, getAllForYouPosts]);
-
+    // useEffect(() => {
+    //     if (inView && exploreHasMore && !isPostLoading) {
+    //         getAllExplorePosts();
+    //     }
+    // }, [inView, exploreHasMore, isPostLoading, getAllExplorePosts]);
 
 
     return (
 
         <div className="flex flex-col">
 
-            {forYouPosts?.map((post: any) => (
+            {bookmarkPosts?.map((post: any) => (
                 <PostCard
                     key={post.post_id}
                     postId={post.post_id}
                     avatar={post?.user?.avatar}
-                    name={post?.user?.name} 
+                    name={post?.user?.name}
                     username={`@${post?.user?.username}`}
                     time={post.created_at}
                     content={post.content}
@@ -64,13 +71,13 @@ const ForYouPostsList = ({ tab }: { tab: string }) => {
             {/* --- SENTINEL ELEMENT --- */}
             <div ref={ref} className="h-20 flex justify-center items-center">
 
-                {isPostLoading && (
+                {isLoading && (
                     <Loader className="animate-spin" color='var(--button-bg)' />
                 )}
 
-                {!forYouHasMore && forYouPosts.length > 0 && (
+                {/* {explorePosts.length > 0 && (
                     <p className="text-gray-500 text-sm py-4">You've reached the end! 🎉</p>
-                )}
+                )} */}
 
             </div>
         </div>
@@ -78,4 +85,4 @@ const ForYouPostsList = ({ tab }: { tab: string }) => {
     );
 };
 
-export default ForYouPostsList;
+export default BookmarkPostsList;

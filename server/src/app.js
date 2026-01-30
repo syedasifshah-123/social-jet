@@ -18,6 +18,7 @@ import { userRoutes } from "./routes/user.routes.js";
 import { followRoutes } from "./routes/follow.routes.js";
 import { connectPeopleRoutes } from "./routes/connectPeople.routes.js";
 import { likeRoutes } from "./routes/like.routes.js";
+import { bookMarkRoutes } from "./routes/bookmark.routes.js";
 
 
 // EXPRESS SERVER
@@ -72,7 +73,7 @@ app.use("/api/peoples", connectPeopleRoutes);
 // LIKE ROUTES
 app.use("/api/likes", likeRoutes);
 // BOOKMARK ROUTES
-app.use("/api/bookmarks", likeRoutes);
+app.use("/api/bookmarks", bookMarkRoutes);
 
 
 
