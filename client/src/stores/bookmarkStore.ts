@@ -8,7 +8,7 @@ interface BookmarkState {
 
     isLoading: boolean;
     isPostsLoading: boolean;
-    bookmarkPosts: [];
+    bookmarkPosts: any[];
 
     // removeBookmarkOptimistic: (postId: string) => void;
     savePost: (id: string) => Promise<boolean>;
@@ -20,6 +20,7 @@ interface BookmarkState {
 
 
 export const useBookmarkStore = create<BookmarkState>((set, get) => ({
+
 
     isLoading: false,
     isPostsLoading: false,

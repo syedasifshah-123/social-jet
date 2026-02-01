@@ -1,12 +1,13 @@
-import { eq, inArray, desc, gte, and, notInArray, ne, or, sql } from "drizzle-orm";
+import { eq, inArray, desc, notInArray, ne, or, sql } from "drizzle-orm";
 import { db } from "../db/config.js";
 import { followsTable } from "../db/schema/Follows.js";
 import { postsTable } from "../db/schema/Posts.js";
 import { usersTable } from "../db/schema/Users.js";
 import { profilesTable } from "../db/schema/Profiles.js";
 import { likesTable } from "../db/schema/Likes.js";
-import { number } from "zod";
 import { bookmarksTable } from "../db/schema/Bookmarks.js";
+import { notifyFollowers } from "../utils/notificationHelper.js";
+
 
 
 
@@ -304,12 +305,41 @@ const createPostController = async (req, res, next) => {
             }
         });
 
+
+        // create new post
         const [newPost] = await db.insert(postsTable).values({
             user_id: userId,
             content,
             media_url: mediaUrl,
             media_type: mediaType,
         }).returning();
+
+
+
+        // get all followers
+        const followers = await db
+            .select({ follower_id: followsTable.follower_id })
+            .from(followsTable)
+            .where(eq(followsTable.following_id, userId));
+
+
+        if (followers.length > 0) {
+
+            const postDataForNotification = {
+                ...newPost,
+                user: {
+                    user_id: user.user_id,
+                    name: user.name,
+                    username: user.username,
+                    avatar: userProfile?.avatar
+                }
+            }
+
+            notifyFollowers(postDataForNotification, followers).catch(err => {
+                console.log(err);
+            });
+
+        }
 
 
         res.status(201).json({

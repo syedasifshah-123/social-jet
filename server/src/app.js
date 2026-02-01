@@ -3,6 +3,7 @@ import express from "express";
 import cookieParser from "cookie-parser";
 import passport from "passport";
 import cors from "cors";
+import http from "node:http";
 
 
 
@@ -19,11 +20,20 @@ import { followRoutes } from "./routes/follow.routes.js";
 import { connectPeopleRoutes } from "./routes/connectPeople.routes.js";
 import { likeRoutes } from "./routes/like.routes.js";
 import { bookMarkRoutes } from "./routes/bookmark.routes.js";
+import { initSocketServer } from "./socket/index.js";
+import { notificationRoutes } from "./routes/notification.routes.js";
 
 
 // EXPRESS SERVER
-export const app = express();
+const app = express();
 
+
+// HTTP SERVER
+export const server = http.createServer(app);
+
+
+// INITIALIZE SOCKET SERVER
+initSocketServer(server);
 
 
 // COOKIE PARSING
@@ -33,6 +43,7 @@ app.use(cookieParser());
 // INCOMING DATA PARSING MIDDLWARE
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
 
 
 
@@ -60,20 +71,30 @@ app.use(passport.initialize());
 app.use("/api/auth", authRoutes);
 app.use("/api/auth", OauthRoutes);
 
-// PROFILE ROUTE
+
+// PROFILE ROUTES
 app.use("/api/profile", profileRoutes);
+
 // POST ROUTE
 app.use("/api/posts", postRoutes);
+
 // USER ROUTE
 app.use("/api/user", userRoutes);
+
 // FOLLOWS ROUTE
 app.use("/api/follows", followRoutes);
+
 // CONNECT WITH TOP PEOPLES
 app.use("/api/peoples", connectPeopleRoutes);
+
 // LIKE ROUTES
 app.use("/api/likes", likeRoutes);
+
 // BOOKMARK ROUTES
 app.use("/api/bookmarks", bookMarkRoutes);
+
+// NOTIFICATION  ROUTES
+app.use("/api/notifications", notificationRoutes);
 
 
 
