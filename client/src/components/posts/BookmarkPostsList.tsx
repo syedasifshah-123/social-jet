@@ -41,7 +41,7 @@ const BookmarkPostsList = () => {
 
 
     return (
-
+        
         <div className="flex flex-col">
 
             {bookmarkPosts?.map((post: any) => (

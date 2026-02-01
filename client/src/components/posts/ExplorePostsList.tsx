@@ -3,9 +3,9 @@
 import { useEffect } from 'react';
 import PostCard from './PostCard';
 import { usePostStore } from '@/stores/postStore';
-import { Loader, UserX2Icon } from 'lucide-react';
+import { Loader } from 'lucide-react';
 import { useInView } from 'react-intersection-observer';
-import Link from 'next/link';
+// import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
 const ExplorePostsList = () => {
