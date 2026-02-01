@@ -2,6 +2,8 @@ import { postsTable } from "../db/schema/Posts.js";
 import { likesTable } from "../db/schema/Likes.js";
 import { db } from "../db/config.js";
 import { and, eq } from "drizzle-orm";
+import { notifyUser } from "../utils/notificationHelper.js";
+import { profilesTable } from "../db/schema/Profiles.js";
 import { usersTable } from "../db/schema/Users.js";
 
 
@@ -18,7 +20,7 @@ const postLikeController = async (req, res, next) => {
         const existing = await db.query.likesTable.findFirst({
             where: and(
                 eq(likesTable.user_id, userId),
-                eq(postsTable.post_id, postId)
+                eq(likesTable.post_id, postId)
             )
         });
 
@@ -28,10 +30,55 @@ const postLikeController = async (req, res, next) => {
         }
 
 
+        // GET post
+        const [post] = await db
+            .select()
+            .from(postsTable)
+            .where(eq(postsTable.post_id, postId))
+            .limit(1);
+
+
+        // User detail
+        const user = await db.query.usersTable.findFirst({
+            where: eq(usersTable.user_id, userId),
+            columns: {
+                user_id: true,
+                username: true,
+                name: true
+            }
+        });
+
+
+        const userProfile = await db.query.profilesTable.findFirst({
+            where: eq(profilesTable.user_id, userId),
+            columns: {
+                avatar: true
+            }
+        });
+
+
+        // insertions in likes table
         await db.insert(likesTable).values({
             user_id: userId,
             post_id: postId
         }).returning();
+
+
+        notifyUser({
+            userId: post.user_id,
+            senderId: userId,
+            type: 'like',
+            content: `${user.name} liked your post`,
+            postId: post.post_id,
+            sender: {
+                user_id: user.user_id,
+                name: user.name,
+                username: user.username,
+                avatar: userProfile?.avatar
+            }
+        }).catch(err => {
+            console.error('Error sending notification:', err);
+        });
 
 
         res.json({

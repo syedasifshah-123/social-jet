@@ -2,6 +2,8 @@ import { pgTable, uuid, text, boolean, timestamp, pgEnum } from "drizzle-orm/pg-
 import { usersTable } from "./Users.js";
 import { commentsTable } from "./Comments.js";
 import { postsTable } from "./Posts.js";
+import { likesTable } from "./Likes.js";
+import { bookmarksTable } from "./Bookmarks.js";
 
 
 // NOTIFICATION TYPE ENUM
@@ -34,6 +36,12 @@ export const notificationsTable = pgTable("notifications", {
 
     comment_id: uuid("comment_id")
         .references(() => commentsTable.comment_id, { onDelete: "cascade" }),
+
+    like_id: uuid("like_id")
+        .references(() => likesTable.like_id, { onDelete: "cascade" }),
+
+    bookmark_id: uuid("bookmark_id")
+        .references(() => bookmarksTable.bookmark_id, { onDelete: "cascade" }),
 
     is_read: boolean("is_read").default(false).notNull(),
 

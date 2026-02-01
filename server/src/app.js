@@ -21,6 +21,7 @@ import { connectPeopleRoutes } from "./routes/connectPeople.routes.js";
 import { likeRoutes } from "./routes/like.routes.js";
 import { bookMarkRoutes } from "./routes/bookmark.routes.js";
 import { initSocketServer } from "./socket/index.js";
+import { notificationRoutes } from "./routes/notification.routes.js";
 
 
 // EXPRESS SERVER
@@ -91,6 +92,9 @@ app.use("/api/likes", likeRoutes);
 
 // BOOKMARK ROUTES
 app.use("/api/bookmarks", bookMarkRoutes);
+
+// NOTIFICATION  ROUTES
+app.use("/api/notifications", notificationRoutes);
 
 
 
