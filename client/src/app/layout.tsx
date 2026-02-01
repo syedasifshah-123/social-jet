@@ -31,6 +31,7 @@ type RootLayoutChildrenType = {
 
 
 export default function RootLayout({ children }: Readonly<RootLayoutChildrenType>) {
+
     return (
         <html lang="en">
             <link rel="shortcut icon" href="/lightlogo.svg" type="image/x-icon" />
