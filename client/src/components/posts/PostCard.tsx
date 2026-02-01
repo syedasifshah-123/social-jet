@@ -180,6 +180,7 @@ const PostCard = ({
     initialIsBookmarked
 }: PostCardProps) => {
 
+
     const { likePost, unLikePost } = useLikeStore();
     const { savePost, unSavePost } = useBookmarkStore();
 
@@ -225,7 +226,7 @@ const PostCard = ({
 
 
 
-    // Handle bookmark
+    // Toggle bookmark Logic
     const handleBookmarkToggle = async (e: React.MouseEvent) => {
         e.stopPropagation();
         if (isBookmarking) return;
@@ -253,12 +254,17 @@ const PostCard = ({
     }
 
 
+
     return (
+
         <div className="flex gap-3 px-4 py-3 border-b border-(--input-border) hover:bg-(--hover)/50 transition cursor-pointer">
 
+            
+            {/* Avatar */}
             <div className="w-10 h-10">
                 <Avatar userAvatar={avatar} />
             </div>
+
 
             <div className="flex-1">
                 <div className="flex items-center gap-2 text-sm">

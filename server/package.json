@@ -27,6 +27,7 @@
         "passport-twitter": "^1.0.4",
         "pg": "^8.16.3",
         "resend": "^6.7.0",
+        "socket.io": "^4.8.3",
         "zod": "^4.3.5"
     },
     "devDependencies": {
