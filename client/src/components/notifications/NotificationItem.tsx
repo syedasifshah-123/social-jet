@@ -48,7 +48,7 @@ const NotificationItem: React.FC<NotificationItemProps> = ({
                 <img
                     src={sender?.avatar || '/default-avatar.png'}
                     alt={sender?.username}
-                    className="w-11 h-11 rounded-full object-cover border border-(--input-border) shadow-sm"
+                    className={`w-11 h-11 rounded-full object-cover shadow-sm ${is_read ? "border border-(--input-border)" : "border-2 border-amber-500"}`}
                 />
                 {!is_read && (
                     <span className="absolute -top-0.5 -right-0.5 w-3.5 h-3.5 bg-blue-500 rounded-full border-2 border-(--bg-color)"></span>

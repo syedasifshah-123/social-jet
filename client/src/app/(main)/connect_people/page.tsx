@@ -44,25 +44,24 @@ const ConnectPeople = () => {
             </div>
 
 
+            <h2 className="pt-5 px-5 text-[20px] font-medium">Who to follow</h2>
+
             {/* Main Section */}
-            <div className="flex flex-col p-5">
-
-                <h2 className="text-[20px] font-medium">Who to follow</h2>
-
+            <div className="flex flex-col">
 
 
                 {/* Top users lists */}
                 <div className="mt-5 w-full flex flex-col items-center justify-between">
 
                     {/* User card */}
-                    {isLoading ? <Loader className="animate-spin duration-100 mt-10" color="var(--button-bg)" size={25} /> : topPeoples.map((p: TopPeoples) => {
+                    {isLoading ? <Loader className="animate-spin duration-100 mt-10" color="var(--button-bg)" size={25} /> : topPeoples.map((p: TopPeoples, idx: number) => {
 
                         // If current user then skip    
                         if (p.id === currentUser?.userId) return null;
                         if (p.isFollowing === true) return null;
 
                         return (
-                            <div key={p.id} className="w-full flex items-center justify-between gap-3 px-4 py-3 hover:bg-(--hover)/40 cursor-pointer transition-all rounded-xl">
+                            <div key={p.id} className={`w-full flex items-center justify-between gap-3 px-4 py-3 hover:bg-(--hover)/40 cursor-pointer transition-all border-b border-(--input-border) ${idx === 1 ? "border-t" : ""}`}>
 
                                 {/* Avatar and username */}
                                 <div className="flex items-center gap-2" onClick={() => router.push(`/${p.username}`)}>

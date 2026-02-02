@@ -6,7 +6,7 @@ import Link from "next/link";
 const NotificationList = () => {
 
 
-    // get user from auth store
+    // Get notification states from notification store
     const { notifications, isLoading } = useNotificationStore();
 
 

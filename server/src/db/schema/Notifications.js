@@ -3,7 +3,7 @@ import { usersTable } from "./Users.js";
 import { commentsTable } from "./Comments.js";
 import { postsTable } from "./Posts.js";
 import { likesTable } from "./Likes.js";
-import { bookmarksTable } from "./Bookmarks.js";
+import { followsTable } from "./Follows.js";
 
 
 // NOTIFICATION TYPE ENUM
@@ -40,8 +40,8 @@ export const notificationsTable = pgTable("notifications", {
     like_id: uuid("like_id")
         .references(() => likesTable.like_id, { onDelete: "cascade" }),
 
-    bookmark_id: uuid("bookmark_id")
-        .references(() => bookmarksTable.bookmark_id, { onDelete: "cascade" }),
+    follow_id: uuid("follow_id")
+        .references(() => followsTable.follow_id, { onDelete: "cascade" }),
 
     is_read: boolean("is_read").default(false).notNull(),
 

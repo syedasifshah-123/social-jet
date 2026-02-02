@@ -2,7 +2,7 @@ import { db } from "../db/config.js";
 import { notificationsTable } from "../db/schema/Notifications.js";
 import { usersTable } from "../db/schema/Users.js";
 import { profilesTable } from "../db/schema/Profiles.js";
-import { and, desc, eq } from "drizzle-orm";
+import { and, desc, eq, sql } from "drizzle-orm";
 
 
 
@@ -60,6 +60,7 @@ const getAllNotificationsController = async (req, res, next) => {
 
 
         const unreadCount = formattedNotifications.filter(n => !n.is_read).length;
+
 
         res.status(200).json({
             success: true,

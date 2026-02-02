@@ -8,7 +8,7 @@ import { onlineUsersManager } from "../socket/utils/onlineUsers.js";
 // SAVE NOTIFICATIONS
 const saveNotification = async (notificationData) => {
 
-    const { userId, senderId, type, content, postId, commentId, likeId, bookmarkId } = notificationData;
+    const { userId, senderId, type, content, postId, commentId, likeId, followId } = notificationData;
 
 
     // CANNOT SHARE ITSELF
@@ -25,7 +25,7 @@ const saveNotification = async (notificationData) => {
             post_id: postId || null,
             comment_id: commentId || null,
             like_id: likeId || null,
-            bookmark_id: bookmarkId || null
+            follow_id: followId || null
         }).returning();
 
 
@@ -44,7 +44,7 @@ const saveNotification = async (notificationData) => {
 // SEND NOTIFICATION
 const notifyUser = async (data) => {
 
-    const { userId, senderId, type, content, postId, commentId, likeId, bookmarkId, sender } = data;
+    const { userId, senderId, type, content, postId, commentId, likeId, followId, sender } = data;
 
 
     // Cannot notify yourself
@@ -65,7 +65,7 @@ const notifyUser = async (data) => {
             postId,
             commentId,
             likeId,
-            bookmarkId
+            followId
         });
 
 
