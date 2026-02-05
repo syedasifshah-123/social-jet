@@ -1,10 +1,11 @@
-import { and, eq, sql, desc, ne } from "drizzle-orm";
+import { and, eq, sql, desc } from "drizzle-orm";
 import { db } from "../db/config.js";
 import { bookmarksTable } from "../db/schema/Bookmarks.js";
 import { postsTable } from "../db/schema/Posts.js";
 import { likesTable } from "../db/schema/Likes.js";
 import { profilesTable } from "../db/schema/Profiles.js";
 import { usersTable } from "../db/schema/Users.js";
+import { commentsTable } from "../db/schema/Comments.js";
 
 
 
@@ -27,7 +28,19 @@ const getBookmarkedPostsController = async (req, res, next) => {
             likesCount: sql`(SELECT count(*) FROM ${likesTable} WHERE ${likesTable.post_id} = ${postsTable.post_id})`.mapWith(Number),
             isLiked: sql`EXISTS (SELECT 1 FROM ${likesTable} WHERE ${likesTable.post_id} = ${postsTable.post_id} AND ${likesTable.user_id} = ${userId})`.mapWith(Boolean),
             bookmarkCount: sql`(SELECT count(*) FROM ${bookmarksTable} WHERE ${bookmarksTable.post_id} = ${postsTable.post_id})`.mapWith(Number),
-            isBookmarked: sql`true`.mapWith(Boolean), // Kyunki hum bookmarks table se hi fetch kar rahe hain
+            isBookmarked: sql`true`.mapWith(Boolean),
+
+            // comments count
+            commentsCount: sql`(
+                SELECT count(*) from ${commentsTable}
+                WHERE ${commentsTable.post_id} = ${postsTable.post_id}
+                )`.mapWith(Number),
+
+            // is commented or not
+            isCommented: sql`(
+                EXISTS (SELECT 1 FROM ${commentsTable} WHERE ${commentsTable.post_id} = ${postsTable.post_id} AND ${commentsTable.user_id} = ${userId})
+            )`.mapWith(Boolean),
+
             user: {
                 name: usersTable.name,
                 username: usersTable.username,

@@ -20,7 +20,7 @@ passport.use(
         callbackURL: ENV.GOOGLE_CALLBACK_URL
     },
 
-        async (accessTokem, refreshToken, profile, done) => {
+        async (accessToken, refreshToken, profile, done) => {
             try {
 
                 const email = profile.emails[0].value;
@@ -44,6 +44,18 @@ passport.use(
                 let user = await db.query.usersTable.findFirst({
                     where: eq(usersTable.email, email),
                 });
+
+
+                // If user exists then link only oauth account
+                if (user) {
+                    await db.insert(oauthAccountsTable).values({
+                        user_id: existingUser.user_id,
+                        provider: "google",
+                        provider_id: profile.id,
+                    });
+
+                    return done(null, { user_id: existingUser.user_id });
+                }
 
 
                 // 3. CREATE USER IF NOT EXISTS

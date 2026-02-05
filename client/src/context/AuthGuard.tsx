@@ -4,7 +4,7 @@ import { useEffect } from "react";
 import { useAuthStore } from "@/stores/authStore";
 
 
-const PROTECTED_ROUTES = ["/home", "/create-profile", "/verify-otp", "/explore"];
+const PROTECTED_ROUTES = ["/home", "/create-profile", "/verify-otp", "/explore", "/connect_people", "/notifications", "/bookmarks", "/profile"];
 const PUBLIC_ROUTES = ["/", "/login", "/signup", "/forgot-password", "/reset-password"];
 
 

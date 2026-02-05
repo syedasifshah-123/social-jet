@@ -223,7 +223,7 @@ export const usePostStore = create<PostState>((set, get) => ({
     // ADD POST TO TOP TEMPORARY FOR THE CURRENT USER
     addPostToTop: (newPost: FormData) => {
         set((state: any) => ({
-            forYouPosts: [newPost, ...state.forYouPosts]
+            forYouPosts: [newPost, ...state.forYouPosts],
         }));
     }
 

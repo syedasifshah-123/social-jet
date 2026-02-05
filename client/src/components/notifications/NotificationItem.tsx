@@ -35,7 +35,6 @@ const NotificationItem: React.FC<NotificationItemProps> = ({
 
     return (
 
-
         <div
             className={`group relative flex items-start gap-4 p-4 border-b transition-all duration-200 text-(--text-color)
             ${!is_read ? 'bg-(--hover)/80' : 'bg-(--bg-color)'} 
@@ -132,6 +131,7 @@ const NotificationItem: React.FC<NotificationItemProps> = ({
 
 
         </div>
+
     );
 }
 

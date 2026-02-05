@@ -2,6 +2,7 @@ import { pgTable, uuid, text, timestamp } from "drizzle-orm/pg-core";
 import { usersTable } from "./Users.js";
 import { postsTable } from "./Posts.js";
 
+
 export const commentsTable = pgTable("comments", {
 
     comment_id: uuid("comment_id").defaultRandom().primaryKey(),

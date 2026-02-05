@@ -5,10 +5,11 @@ import { onlineUsersManager } from "../socket/utils/onlineUsers.js";
 
 
 
-// SAVE NOTIFICATIONS
+
+// SAVE NOTIFICATIONS IN  DB
 const saveNotification = async (notificationData) => {
 
-    const { userId, senderId, type, content, postId, commentId, likeId, followId } = notificationData;
+    const { userId, senderId, type, content, postId } = notificationData;
 
 
     // CANNOT SHARE ITSELF
@@ -23,9 +24,6 @@ const saveNotification = async (notificationData) => {
             type: type,
             message: content,
             post_id: postId || null,
-            comment_id: commentId || null,
-            like_id: likeId || null,
-            follow_id: followId || null
         }).returning();
 
 
@@ -44,7 +42,7 @@ const saveNotification = async (notificationData) => {
 // SEND NOTIFICATION
 const notifyUser = async (data) => {
 
-    const { userId, senderId, type, content, postId, commentId, likeId, followId, sender } = data;
+    const { userId, senderId, type, content, postId, sender } = data;
 
 
     // Cannot notify yourself
@@ -63,13 +61,7 @@ const notifyUser = async (data) => {
             type,
             content,
             postId,
-            commentId,
-            likeId,
-            followId
         });
-
-
-        console.log('✅ Notification saved to DB:', notification.notification_id);
 
 
         // CHECK IF USER IS ONLINE OR NOT
@@ -89,10 +81,7 @@ const notifyUser = async (data) => {
                 }
             });
 
-            console.log('🔔 Real-time notification sent to user:', userId);
 
-        } else {
-            console.log('💾 User offline, notification saved in DB only');
         }
 
 
@@ -135,7 +124,7 @@ const notifyFollowers = async (postData, followers) => {
                     content: `${postData.user.name} created a new post`,
                     postId: postData.post_id
                 });
-                
+
 
                 // Check if online
                 const isOnline = onlineUsersManager.isUserOnline(follower.follower_id);

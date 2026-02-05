@@ -41,7 +41,7 @@ const BookmarkPostsList = () => {
 
 
     return (
-        
+
         <div className="flex flex-col">
 
             {bookmarkPosts?.map((post: any) => (
@@ -58,6 +58,8 @@ const BookmarkPostsList = () => {
                     initialIsLiked={post.isLiked}
                     initialBookmarkCount={post.bookmarkCount}
                     initialIsBookmarked={post.isBookmarked}
+                    initialCommentsCount={post.commentsCount}
+                    initialIsCommented={post.isCommented}
                 />
             ))}
 

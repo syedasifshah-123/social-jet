@@ -7,6 +7,7 @@ import { profilesTable } from "../db/schema/Profiles.js";
 import { likesTable } from "../db/schema/Likes.js";
 import { bookmarksTable } from "../db/schema/Bookmarks.js";
 import { notifyFollowers } from "../utils/notificationHelper.js";
+import { commentsTable } from "../db//schema/Comments.js";
 
 
 
@@ -57,15 +58,30 @@ const getAllForYouPostsController = async (req, res, next) => {
                     SELECT count(*) FROM ${likesTable} 
                     WHERE ${likesTable.post_id} = ${postsTable.post_id}
                 )`.mapWith(Number),
+
+
                 // IS LIKED BY CURRENT USER
                 isLiked: sql` EXISTS (
                     SELECT 1 FROM ${likesTable} 
                     WHERE ${likesTable.post_id} = ${postsTable.post_id} 
                     AND ${likesTable.user_id} = ${userId}
                 )`.mapWith(Boolean),
+
                 // bookmark count
                 bookmarkCount: sql`(SELECT count(*) FROM ${bookmarksTable} WHERE ${bookmarksTable.post_id} = ${postsTable.post_id})`.mapWith(Number),
-                isBookmarked: sql`EXISTS (SELECT 1 FROM ${bookmarksTable} WHERE ${bookmarksTable.post_id} = ${postsTable.post_id} AND ${bookmarksTable.user_id} = ${userId})`.mapWith(Boolean)
+                isBookmarked: sql`EXISTS (SELECT 1 FROM ${bookmarksTable} WHERE ${bookmarksTable.post_id} = ${postsTable.post_id} AND ${bookmarksTable.user_id} = ${userId})`.mapWith(Boolean),
+
+                // comments count
+                commentsCount: sql`(
+                    SELECT count(*) from ${commentsTable}
+                    WHERE ${commentsTable.post_id} = ${postsTable.post_id}
+                )`.mapWith(Number),
+
+                // is commented or not
+                isCommented: sql`(
+                    EXISTS (SELECT 1 FROM ${commentsTable} WHERE ${commentsTable.post_id} = ${postsTable.post_id} AND ${commentsTable.user_id} = ${userId})
+                )`.mapWith(Boolean)
+
             })
             .from(postsTable)
             .leftJoin(usersTable, eq(postsTable.user_id, usersTable.user_id))
@@ -143,6 +159,18 @@ const getAllFollowingPostsController = async (req, res, next) => {
                 )`.mapWith(Boolean),
                 bookmarkCount: sql`(SELECT count(*) FROM ${bookmarksTable} WHERE ${bookmarksTable.post_id} = ${postsTable.post_id})`.mapWith(Number),
                 isBookmarked: sql`EXISTS (SELECT 1 FROM ${bookmarksTable} WHERE ${bookmarksTable.post_id} = ${postsTable.post_id} AND ${bookmarksTable.user_id} = ${userId})`.mapWith(Boolean),
+
+                // comments count
+                commentsCount: sql`(
+                    SELECT count(*) from ${commentsTable}
+                    WHERE ${commentsTable.post_id} = ${postsTable.post_id}
+                )`.mapWith(Number),
+
+                // is commented or not
+                isCommented: sql`(
+                    EXISTS (SELECT 1 FROM ${commentsTable} WHERE ${commentsTable.post_id} = ${postsTable.post_id} AND ${commentsTable.user_id} = ${userId})
+                )`.mapWith(Boolean),
+
                 user: {
                     name: usersTable.name,
                     username: usersTable.username,
@@ -204,6 +232,18 @@ const getAllExplorePostsController = async (req, res, next) => {
                 )`.mapWith(Boolean),
                 bookmarkCount: sql`(SELECT count(*) FROM ${bookmarksTable} WHERE ${bookmarksTable.post_id} = ${postsTable.post_id})`.mapWith(Number),
                 isBookmarked: sql`EXISTS (SELECT 1 FROM ${bookmarksTable} WHERE ${bookmarksTable.post_id} = ${postsTable.post_id} AND ${bookmarksTable.user_id} = ${userId})`.mapWith(Boolean),
+
+                // comments count
+                commentsCount: sql`(
+                    SELECT count(*) from ${commentsTable}
+                    WHERE ${commentsTable.post_id} = ${postsTable.post_id}
+                )`.mapWith(Number),
+
+                // is commented or not
+                isCommented: sql`(
+                    EXISTS (SELECT 1 FROM ${commentsTable} WHERE ${commentsTable.post_id} = ${postsTable.post_id} AND ${commentsTable.user_id} = ${userId})
+                )`.mapWith(Boolean),
+
                 user: {
                     name: usersTable.name,
                     username: usersTable.username,
@@ -335,6 +375,7 @@ const createPostController = async (req, res, next) => {
                 }
             }
 
+            // socket real time
             notifyFollowers(postDataForNotification, followers).catch(err => {
                 console.log(err);
             });

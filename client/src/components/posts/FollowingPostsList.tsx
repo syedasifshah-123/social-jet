@@ -69,6 +69,8 @@ const FollowingPostList = ({ tab }: { tab: string }) => {
                     initialIsLiked={post.isLiked}
                     initialBookmarkCount={post.bookmarkCount}
                     initialIsBookmarked={post.isBookmarked}
+                    initialCommentsCount={post.commentsCount}
+                    initialIsCommented={post.isCommented}
                 />
             ))}
 

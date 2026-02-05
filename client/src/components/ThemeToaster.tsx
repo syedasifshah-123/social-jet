@@ -21,9 +21,10 @@ export const ThemeToaster = () => {
                     color: toastTextColor,
                     border: `1px solid ${toastBorderColor}`,
                     fontFamily: 'var(--font-sohne)',
-                    fontSize: "16px",
+                    fontSize: "15px",
                     gap: '10px',
-                    boxShadow: "none"
+                    boxShadow: "none",
+                    height: "55px"
                 },
             }}
         />

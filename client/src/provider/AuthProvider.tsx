@@ -23,7 +23,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             {/* INITIALLY CHECH AUTH LOADING */}
             {isCheckingAuth ? (
                 <div className="flex h-screen items-center justify-center bg-var(--bg-color)">
-                    <Loader className="animate-spin duration-1000 mx-auto" color="var(--button-bg)" size={35}/>
+                    <Loader className="animate-spin duration-1000 mx-auto" color="var(--button-bg)" size={35} />
                 </div>
             ) : (
                 children

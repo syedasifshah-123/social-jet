@@ -2,6 +2,7 @@ import { create } from "zustand";
 import api from "@/config/axios";
 import { showToast } from "@/utils/showToast";
 
+
 interface FollowState {
 
     isLoading: boolean;
@@ -10,6 +11,8 @@ interface FollowState {
     unFollowUser: (userId: string) => Promise<boolean>;
 
 }
+
+
 
 export const useFollowStore = create<FollowState>((set) => ({
 
@@ -40,7 +43,7 @@ export const useFollowStore = create<FollowState>((set) => ({
         }
     },
 
-    
+
 
     // unfollow user action
     unFollowUser: async (userId) => {

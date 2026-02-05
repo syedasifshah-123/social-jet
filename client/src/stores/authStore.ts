@@ -1,5 +1,13 @@
 import api from "@/config/axios";
-import { ApiErrorResponse, ConfirmResetPasswordType, ForgotPassworFormType, ForgotPassworOtpFormType, LoginFormType, OtpVerificationFormType, SignupFormType } from "@/types/authTypes";
+import {
+    ApiErrorResponse,
+    ConfirmResetPasswordType,
+    ForgotPassworFormType,
+    ForgotPassworOtpFormType,
+    LoginFormType,
+    OtpVerificationFormType,
+    SignupFormType
+} from "@/types/authTypes";
 import { showToast } from "@/utils/showToast";
 import { AxiosError } from "axios";
 import { User } from "lucide-react";
@@ -20,8 +28,8 @@ interface AuthState {
     accessToken: string | null;
     user: User | null;
     isAuthenticated?: boolean;
-    isLoading: boolean;
     isCheckingAuth: boolean;
+    isLoading: boolean;
 
 
     signup: (formData: SignupFormType) => Promise<boolean>;
@@ -69,6 +77,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
             set({ user: response.data, isAuthenticated: true });
 
         } catch (err: unknown) {
+
             const error = err as AxiosError<ApiErrorResponse>;
             const serverMessage = error?.response?.data?.message;
             const msg = serverMessage || error.message || "Request failed";
@@ -287,7 +296,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
             const response = await api.post("/auth/reset-password/confirm", formData);
             const { success, message } = response.data;
 
-            if (success)  {
+            if (success) {
                 showToast({ type: "success", message });
             }
 

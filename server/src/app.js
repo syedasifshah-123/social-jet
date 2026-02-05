@@ -22,6 +22,7 @@ import { likeRoutes } from "./routes/like.routes.js";
 import { bookMarkRoutes } from "./routes/bookmark.routes.js";
 import { initSocketServer } from "./socket/index.js";
 import { notificationRoutes } from "./routes/notification.routes.js";
+import { commentRoutes } from "./routes/comment.routes.js";
 
 
 // EXPRESS SERVER
@@ -95,6 +96,9 @@ app.use("/api/bookmarks", bookMarkRoutes);
 
 // NOTIFICATION  ROUTES
 app.use("/api/notifications", notificationRoutes);
+
+// COMMENT ROUTES
+app.use("/api/comments", commentRoutes);
 
 
 

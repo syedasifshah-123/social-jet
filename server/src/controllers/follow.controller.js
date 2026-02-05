@@ -96,6 +96,7 @@ import { notifyUser } from "../utils/notificationHelper.js";
 // FOLLOW USER
 const followUserController = async (req, res, next) => {
     try {
+
         const followerId = req.user.user_id;
         const { id: followingId } = req.params;
 
@@ -150,7 +151,8 @@ const followUserController = async (req, res, next) => {
             })
             .returning();
 
-        // ✅ Send notification (background)
+
+        // send notification (background)
         notifyUser({
             userId: followingId,
             senderId: followerId,
@@ -166,6 +168,7 @@ const followUserController = async (req, res, next) => {
         }).catch(err => {
             console.error('Error sending notification:', err);
         });
+
 
         res.status(201).json({
             success: true,

@@ -221,21 +221,17 @@ export const useNotificationStore = create<NotificationState>((set, get) => ({
             const response = await api.delete(`/notifications/${notificationId}/delete`);
             const { success, message } = response.data;
 
+            set((state) => ({
+
+                notifications: state.notifications.filter((n) => n.notification_id !== notificationId),
+                unreadNotificationCount: state.notifications.find(n => n.notification_id === notificationId)?.is_read
+                    ? state.unreadCount
+                    : Math.max(0, state.unreadCount - 1)
+
+            }));
+
             if (success) {
-
-                set((state) => ({
-
-                    notifications: state.notifications.filter((n) => n.notification_id !== notificationId),
-
-                    // if notification is on unread to reduce the unread count
-                    unreadNotificationCount: state.notifications.find(n => n.notification_id === notificationId)?.is_read
-                        ? state.unreadCount
-                        : Math.max(0, state.unreadCount - 1)
-
-                }));
-
                 showToast({ type: "success", message });
-
             } else {
                 console.log("Error in delete notification");
             }

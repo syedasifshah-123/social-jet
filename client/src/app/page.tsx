@@ -22,7 +22,7 @@ const HomePage = () => {
 
             {/* RIGHT SIDE */}
             <div className="w-full md:w-1/2 flex items-center justify-center px-8">
-                <div className="max-w-sm w-full">
+                <div className="max-w-112.5  w-full">
 
                     <h2 className="text-4xl font-bold mb-6">Join today.</h2>
 
