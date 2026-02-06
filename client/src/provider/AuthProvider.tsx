@@ -1,7 +1,10 @@
 "use client";
-import React, { createContext, useContext, useEffect } from "react";
+
+
+import React, { createContext, useEffect } from "react";
 import { useAuthStore } from "@/stores/authStore";
-import { Loader } from "lucide-react";
+import Image from "next/image";
+import { useTheme } from "@/context/ThemeContext";
 
 
 const AuthContext = createContext(null);
@@ -10,6 +13,8 @@ const AuthContext = createContext(null);
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
     const { checkAuth, isCheckingAuth } = useAuthStore();
+    const { theme } = useTheme();
+    const logoSrc = theme === "dark" ? "/lightlogo.svg" : "/darklogo.svg";
 
 
     // INTIALLY AUTH CHECKING
@@ -23,7 +28,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             {/* INITIALLY CHECH AUTH LOADING */}
             {isCheckingAuth ? (
                 <div className="flex h-screen items-center justify-center bg-var(--bg-color)">
-                    <Loader className="animate-spin duration-1000 mx-auto" color="var(--button-bg)" size={35} />
+                    <Image
+                        src={logoSrc}
+                        className="mx-auto my-10"
+                        alt="App Logo"
+                        width={60}
+                        height={60}
+                        priority
+                    />
                 </div>
             ) : (
                 children

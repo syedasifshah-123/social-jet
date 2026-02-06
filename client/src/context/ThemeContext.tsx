@@ -25,6 +25,7 @@ export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
         }
     }, []);
 
+
     // update html attribute
     useEffect(() => {
         document.documentElement.setAttribute("data-theme", theme);

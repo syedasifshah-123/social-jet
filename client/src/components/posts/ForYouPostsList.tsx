@@ -46,19 +46,7 @@ const ForYouPostsList = ({ tab }: { tab: string }) => {
             {forYouPosts?.map((post: any) => (
                 <PostCard
                     key={post.post_id}
-                    postId={post.post_id}
-                    avatar={post?.user?.avatar}
-                    name={post?.user?.name} 
-                    username={`@${post?.user?.username}`}
-                    time={post.created_at}
-                    content={post.content}
-                    media={post.media_url}
-                    initialLikesCount={post.likesCount}
-                    initialIsLiked={post.isLiked}
-                    initialBookmarkCount={post.bookmarkCount}
-                    initialIsBookmarked={post.isBookmarked}
-                    initialCommentsCount={post.commentsCount}
-                    initialIsCommented={post.isCommented}
+                    post={post}
                 />
             ))}
 

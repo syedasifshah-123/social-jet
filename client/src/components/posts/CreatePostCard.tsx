@@ -81,7 +81,7 @@ const CreatePostCard = () => {
             const success = await usePostStore.getState().createPost(formData)
 
             if (success) {
-                
+
                 closeModal();
                 setPostContent("");
                 setSelectedFile(null);
@@ -122,17 +122,20 @@ const CreatePostCard = () => {
 
                 {previewUrl && (
                     <div className="relative my-3 w-full max-h-100 overflow-hidden rounded-2xl border border-gray-700">
+
                         <button
                             onClick={removeImage}
                             className="absolute top-2 left-2 bg-gray-900/80 p-1 rounded-full hover:bg-gray-800"
                         >
                             <X size={20} className="text-white" />
                         </button>
+
                         <img
                             src={previewUrl}
                             alt="Preview"
                             className="w-full h-full object-cover"
                         />
+
                     </div>
                 )}
 
@@ -152,9 +155,6 @@ const CreatePostCard = () => {
                                 onChange={handleImageChange}
                             />
                         </div>
-
-
-                        {/* <Sparkles className="w-5 h-5 cursor-pointer" /> */}
 
 
                         {/* Emoji picker icon */}
@@ -183,7 +183,7 @@ const CreatePostCard = () => {
 
                     </div>
 
-                    <button className="surface-btn cursor-pointer" onClick={handleCreatePost}>
+                    <button className="surface-btn cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed" onClick={handleCreatePost} disabled={isLoading || !postContent.trim()} >
                         {isLoading ? <Loader className="animate-spin duration-1000 mx-auto" color="var(--bg-color)" /> : "Post"}
                     </button>
 

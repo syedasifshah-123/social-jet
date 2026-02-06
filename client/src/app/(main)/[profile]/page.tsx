@@ -4,8 +4,6 @@ import Image from "next/image";
 import {
     ArrowLeft,
     Loader,
-    MoreHorizontal,
-    UserPlus,
 } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
 import { useProfileStore } from "@/stores/profileStore";
@@ -13,8 +11,9 @@ import { useEffect } from "react";
 import FollowButton from "@/components/FollowBtn";
 import { useAuthStore } from "@/stores/authStore";
 
-export default function ProfilePage() {
 
+
+export default function ProfilePage() {
 
     const router = useRouter();
 

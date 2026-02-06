@@ -12,6 +12,46 @@ type Post = {
 }
 
 
+export type PostCardProps = {
+    user: {
+        avatar: string;
+        name: string;
+        username: string;
+    },
+    post_id: string;
+    created_at: string;
+    content: string;
+    media_url?: string;
+    verified?: boolean;
+    likesCount: number;
+    isLiked: boolean;
+    bookmarkCount: number;
+    isBookmarked: boolean;
+    commentsCount: number;
+    isCommented: boolean;
+};
+
+
+// export type SinglePost = {
+//     post_id: string;
+//     content: string;
+//     media_url: string | null;
+//     created_at: Date;
+//     likesCount: number;
+//     isLiked: boolean;
+//     bookmarkCount: number;
+//     isBookmarked: boolean;
+//     commentsCount: number;
+//     isCommented: boolean;
+//     user: {
+//         name: string,
+//         username: string,
+//         avatar: string | null
+//     }
+// }
+
+
+
 type PostState = {
 
     isLoading: boolean;
@@ -20,6 +60,7 @@ type PostState = {
     forYouPosts: Post[];
     followingPosts: Post[];
     explorePosts: Post[];
+    post: PostCardProps | null,
 
     forYouHasMore: boolean;
     forYouPage: number;
@@ -28,6 +69,8 @@ type PostState = {
     exploreHasMore: boolean;
     explorePage: number;
 
+
+    getPostDetail: (postId: string) => Promise<void>;
     getAllForYouPosts: () => Promise<void>;
     getAllFollowingPosts: () => Promise<void>;
     getAllExplorePosts: () => Promise<void>;
@@ -43,9 +86,11 @@ export const usePostStore = create<PostState>((set, get) => ({
 
     isLoading: false,
     isPostLoading: false,
+
     forYouPosts: [],
     followingPosts: [],
     explorePosts: [],
+    post: null,
 
     followingHasMore: true,
     followingPage: 1,
@@ -53,6 +98,30 @@ export const usePostStore = create<PostState>((set, get) => ({
     forYouPage: 1,
     exploreHasMore: true,
     explorePage: 1,
+
+
+
+    // GET POST DETAIL ACTION
+    getPostDetail: async (postId: string): Promise<void> => {
+        set({ isLoading: true });
+        try {
+
+            const response = await api.get(`/posts/${postId}/detail`);
+            const { success, data } = response.data;
+
+            if (success) {
+                set({ post: data });
+            } else {
+                showToast({ type: "error", message: "Error in fetching post." })
+            }
+
+        } catch (err: any) {
+            showToast({ type: "error", message: err?.response?.data?.message });
+            console.log(err);
+        } finally {
+            set({ isLoading: false });
+        }
+    },
 
 
 

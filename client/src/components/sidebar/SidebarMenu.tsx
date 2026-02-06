@@ -59,7 +59,7 @@ const SidebarMenu = () => {
 
                     {/* Icon with Badge */}
                     <div className="relative">
-                        <Icon className="w-6 h-6" />
+                        <Icon className={`w-6 h-6 ${pathname === item.path ? "fill-(--text-color)" : ""}`} />
 
                         {item.showBadge && unreadCount > 0 && (
                             <span className="max-sm:flex max-md:flex hidden absolute -top-2 -right-2 items-center justify-center w-5 h-5 text-[10px] font-bold text-white bg-red-500 rounded-full">

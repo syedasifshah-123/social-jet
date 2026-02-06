@@ -224,6 +224,7 @@ const getAllExplorePostsController = async (req, res, next) => {
                     SELECT count(*) FROM ${likesTable} 
                     WHERE ${likesTable.post_id} = ${postsTable.post_id}
                 )`.mapWith(Number),
+
                 // IS LIKED BY CURRENT USER
                 isLiked: sql` EXISTS (
                     SELECT 1 FROM ${likesTable} 
@@ -281,16 +282,60 @@ const getPostDetailController = async (req, res, next) => {
     try {
 
         const { id: postId } = req.params;
+        const { user_id: userId } = req.user;
 
-        const post = await db.query.postsTable.findFirst({ where: eq(postsTable.post_id, postId) });
 
-        if (!post) {
+        const [singlePost] = await db
+            .select({
+                post_id: postsTable.post_id,
+                content: postsTable.content,
+                media_url: postsTable.media_url,
+                created_at: postsTable.created_at,
+
+                likesCount: sql` (
+                    SELECT count(*) FROM ${likesTable} 
+                    WHERE ${likesTable.post_id} = ${postsTable.post_id}
+                )`.mapWith(Number),
+
+                // IS LIKED BY CURRENT USER
+                isLiked: sql` EXISTS (
+                    SELECT 1 FROM ${likesTable} 
+                    WHERE ${likesTable.post_id} = ${postsTable.post_id} 
+                    AND ${likesTable.user_id} = ${userId}
+                )`.mapWith(Boolean),
+
+                bookmarkCount: sql`(SELECT count(*) FROM ${bookmarksTable} WHERE ${bookmarksTable.post_id} = ${postsTable.post_id})`.mapWith(Number),
+                isBookmarked: sql`EXISTS (SELECT 1 FROM ${bookmarksTable} WHERE ${bookmarksTable.post_id} = ${postsTable.post_id} AND ${bookmarksTable.user_id} = ${userId})`.mapWith(Boolean),
+
+                // comments count
+                commentsCount: sql`(
+                    SELECT count(*) from ${commentsTable}
+                    WHERE ${commentsTable.post_id} = ${postsTable.post_id}
+                )`.mapWith(Number),
+
+                // is commented or not
+                isCommented: sql`(
+                    EXISTS (SELECT 1 FROM ${commentsTable} WHERE ${commentsTable.post_id} = ${postsTable.post_id} AND ${commentsTable.user_id} = ${userId})
+                )`.mapWith(Boolean),
+
+                user: {
+                    name: usersTable.name,
+                    username: usersTable.username,
+                    avatar: profilesTable.avatar,
+                },
+            })
+            .from(postsTable)
+            .leftJoin(usersTable, eq(postsTable.user_id, usersTable.user_id))
+            .leftJoin(profilesTable, eq(postsTable.user_id, profilesTable.user_id))
+            .where(eq(postsTable.post_id, postId));
+
+        if (!singlePost) {
             throw new Error("Post not found!");
         }
 
         res.status(201).json({
             success: true,
-            data: post
+            data: singlePost
         });
 
     } catch (err) {

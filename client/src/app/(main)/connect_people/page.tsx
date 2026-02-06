@@ -56,12 +56,12 @@ const ConnectPeople = () => {
                     {/* User card */}
                     {isLoading ? <Loader className="animate-spin duration-100 mt-10" color="var(--button-bg)" size={25} /> : topPeoples.map((p: TopPeoples, idx: number) => {
 
-                        // If current user then skip    
+                        // If current user then skip 
                         if (p.id === currentUser?.userId) return null;
                         if (p.isFollowing === true) return null;
 
                         return (
-                            <div key={p.id} className={`w-full flex items-center justify-between gap-3 px-4 py-3 hover:bg-(--hover)/40 cursor-pointer transition-all border-b border-(--input-border) ${idx === 0 ? "border-t" : ""}`}>
+                            <div key={p.id} className={`w-full flex items-center justify-between gap-3 px-4 py-3 hover:bg-(--hover)/40 cursor-pointer transition-all border-(--input-border) ${idx === 0 ? "border-t" : "border-b"}`}>
 
                                 {/* Avatar and username */}
                                 <div className="flex items-center gap-2" onClick={() => router.push(`/${p.username}`)}>

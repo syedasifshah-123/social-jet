@@ -13,9 +13,7 @@ interface CommentCardProps {
 
 const CommentCard = ({ onCommentDeleted, onEditClick }: CommentCardProps) => {
 
-
     const { comments, isLoading } = useCommentStore();
-
 
     // Loading State
     if (isLoading) {
