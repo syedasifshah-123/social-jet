@@ -9,7 +9,7 @@ import { useState } from "react";
 import { usePostView } from "@/hooks/usePostView";
 
 
-interface PostCardExtralProps {
+export interface PostCardExtralProps {
     post: PostCardProps,
     onCommentAdded: () => void;
     onCommentDeleted: () => void;
@@ -23,11 +23,12 @@ const PostCard = ({ post }: PostCardExtralProps) => {
 
     const [localViewCount, setLocalViewCount] = useState(post.viewsCount);
 
-    // ✅ STEP 7B: Use view tracking hook
+
+    //  Use view tracking hook
     const { elementRef } = usePostView({
         postId: post.post_id,
         onView: () => {
-            // ✅ Optimistic update - increment view count
+            // Optimistic update - increment view count
             setLocalViewCount(prev => prev + 1);
         },
         enabled: true
@@ -80,7 +81,7 @@ const PostCard = ({ post }: PostCardExtralProps) => {
 
             {/* Post reaction btn */}
             <div className="pl-16 pr-4 pb-2">
-                <PostReactionBtnList post={post} onCommentAdded={() => {}} onCommentDeleted={() => {}} />
+                <PostReactionBtnList post={post} onCommentAdded={() => { }} onCommentDeleted={() => { }} />
             </div>
 
         </div>

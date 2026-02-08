@@ -40,7 +40,7 @@ authRoutes.post("/reset-password/confirm", resetPasswordController);
 
 
 authRoutes.post("/login", loginController);
-authRoutes.post("/logout", logoutController);
+authRoutes.post("/logout", authMiddleware, logoutController);
 
 
 authRoutes.put("/change-password", authMiddleware, changePasswordController);

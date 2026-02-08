@@ -5,6 +5,7 @@ import { and, eq } from "drizzle-orm";
 import { notifyUser } from "../utils/notificationHelper.js";
 import { profilesTable } from "../db/schema/Profiles.js";
 import { usersTable } from "../db/schema/Users.js";
+import { deleteCacheByPattern } from "../utils/cacheHelper.js";
 
 
 
@@ -64,6 +65,13 @@ const postLikeController = async (req, res, next) => {
         }).returning();
 
 
+        // DELETE CACHE KEY
+        await deleteCacheByPattern(`feed:${userId}:foryou:*`);
+        await deleteCacheByPattern(`feed:${userId}:following:*`);
+        await deleteCacheByPattern(`feed:${userId}:explore:*`);
+        await deleteCacheByPattern(`feed:${userId}:bookmarks:*`);
+
+
         notifyUser({
             userId: post.user_id,
             senderId: userId,
@@ -110,6 +118,13 @@ const postUnLikeController = async (req, res, next) => {
                 eq(likesTable.post_id, postId)
             )
         );
+
+
+        // DELETE CACHE KEY
+        await deleteCacheByPattern(`feed:${userId}:foryou:*`);
+        await deleteCacheByPattern(`feed:${userId}:following:*`);
+        await deleteCacheByPattern(`feed:${userId}:explore:*`);
+        await deleteCacheByPattern(`feed:${userId}:bookmarks:*`);
 
         return res.status(200).json({
             success: true

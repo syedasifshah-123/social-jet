@@ -5,6 +5,7 @@ import { profilesTable } from "../db/schema/Profiles.js";
 import { and, desc, eq } from "drizzle-orm";
 import { notifyUser } from "../utils/notificationHelper.js";
 import { postsTable } from "../db/schema/Posts.js";
+import { deleteCacheByPattern } from "../utils/cacheHelper.js";
 
 
 
@@ -101,6 +102,13 @@ const commentPostController = async (req, res, next) => {
 
 
 
+        // DELETE CACHE KEY
+        await deleteCacheByPattern(`feed:${userId}:foryou:*`);
+        await deleteCacheByPattern(`feed:${userId}:following:*`);
+        await deleteCacheByPattern(`feed:${userId}:explore:*`);
+        await deleteCacheByPattern(`feed:${userId}:bookmarks:*`);
+
+
         if (!newComment) {
             throw new Error("Failed to create comment");
         }
@@ -188,6 +196,13 @@ const editCommentController = async (req, res, next) => {
             )).returning();
 
 
+        // DELETE CACHE KEY
+        await deleteCacheByPattern(`feed:${userId}:foryou:*`);
+        await deleteCacheByPattern(`feed:${userId}:following:*`);
+        await deleteCacheByPattern(`feed:${userId}:explore:*`);
+        await deleteCacheByPattern(`feed:${userId}:bookmarks:*`);
+
+
         if (!updatedComment) {
             throw new Error("Failed to edit comment");
         }
@@ -221,6 +236,13 @@ const deleteCommentController = async (req, res, next) => {
                 eq(commentsTable.user_id, userId)
             ))
             .returning();
+
+
+        // DELETE CACHE KEY
+        await deleteCacheByPattern(`feed:${userId}:foryou:*`);
+        await deleteCacheByPattern(`feed:${userId}:following:*`);
+        await deleteCacheByPattern(`feed:${userId}:explore:*`);
+        await deleteCacheByPattern(`feed:${userId}:bookmarks:*`);
 
         if (result.length === 0) {
             return res.status(403).json({

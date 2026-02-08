@@ -6,6 +6,7 @@ import { likesTable } from "../db/schema/Likes.js";
 import { profilesTable } from "../db/schema/Profiles.js";
 import { usersTable } from "../db/schema/Users.js";
 import { commentsTable } from "../db/schema/Comments.js";
+import { deleteCacheByPattern, getCache, setCache } from "../utils/cacheHelper.js";
 
 
 
@@ -20,7 +21,22 @@ const getBookmarkedPostsController = async (req, res, next) => {
         const limit = parseInt(req.query.limit) || 10;
         const offset = (page - 1) * limit;
 
-        const bookmarks = await db.select({
+
+        // SAVE DATA IN CACHE
+        const cacheKey = `feed:${userId}:bookmarks:page:${page}:limit:${limit}`;
+        let bookmarksPosts = await getCache(cacheKey);
+
+
+        if (bookmarksPosts) {
+            return res.status(200).json({
+                success: true,
+                data: bookmarksPosts,
+                cached: true
+            });
+        }
+
+
+        bookmarksPosts = await db.select({
             post_id: postsTable.post_id,
             content: postsTable.content,
             media_url: postsTable.media_url,
@@ -57,9 +73,12 @@ const getBookmarkedPostsController = async (req, res, next) => {
             .offset(offset);
 
 
+        // SAVE IN REDIS CACHE
+        await setCache(cacheKey, bookmarksPosts, 180);
+
         res.status(200).json({
             success: true,
-            data: bookmarks
+            data: bookmarksPosts
         });
 
     } catch (err) {
@@ -79,27 +98,17 @@ const postSaveController = async (req, res, next) => {
         const { postId } = req.params;
 
 
-        // const existing = await db.query.bookmarksTable.findFirst({
-        //     where: and(
-        //         eq(bookmarksTable.user_id, userId),
-        //         eq(postsTable.post_id, postId)
-        //     )
-        // });
-
-
-        // if (existing) {
-        //     return res.json({
-        //         success: false,
-        //         message: "Post is already in bookmark."
-        //     });
-        // }
-
-
         await db.insert(bookmarksTable).values({
             user_id: userId,
             post_id: postId
         }).returning();
 
+
+        // DELETE CACHE KEY
+        await deleteCacheByPattern(`feed:${userId}:foryou:*`);
+        await deleteCacheByPattern(`feed:${userId}:following:*`);
+        await deleteCacheByPattern(`feed:${userId}:explore:*`);
+        await deleteCacheByPattern(`feed:${userId}:bookmarks:*`);
 
         return res.status(200).json({
             success: true,
@@ -131,6 +140,14 @@ const postUnSaveController = async (req, res, next) => {
                 eq(bookmarksTable.post_id, postId)
             )
         );
+
+
+        // DELETE CACHE KEY
+        await deleteCacheByPattern(`feed:${userId}:foryou:*`);
+        await deleteCacheByPattern(`feed:${userId}:following:*`);
+        await deleteCacheByPattern(`feed:${userId}:explore:*`);
+        await deleteCacheByPattern(`feed:${userId}:bookmarks:*`);
+
 
         return res.status(200).json({
             success: true,

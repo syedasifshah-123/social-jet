@@ -11,7 +11,7 @@ import { generateAccessToken, generateRefreshToken } from "../utils/tokens.js";
 import { usersTable } from "../db/schema/Users.js";
 import { otpsTable } from "../db/schema/Otps.js";
 import { profilesTable } from "../db/schema/Profiles.js";
-
+import { deleteCache, getCache, setCache } from "../utils/cacheHelper.js";
 
 
 
@@ -22,7 +22,6 @@ const checkAuthController = async (req, res, next) => {
     try {
 
         const { user_id: userId } = req.user;
-
 
 
         // FETCH USER
@@ -231,20 +230,16 @@ const registerController = async (req, res, next) => {
                 isVerified: false
             }).returning();
 
-            await tx.insert(otpsTable).values({
-                user_id: newUser.user_id,
-                otp_type: "verify",
-                otp,
-                expires_at: new Date(Date.now() + 5 * 60 * 1000)
-            }).returning();
+            // OTP stored in redis cache
+            const otpCacheKey = `otp:verify:${newUser.user_id}`;
+            await setCache(otpCacheKey, otp, 300); // 5min
+
 
             await tx.insert(profilesTable).values({
                 user_id: newUser.user_id,
             }).returning();
 
         });
-
-
 
         // GENERATE TOKENS 
         const accessToken = generateAccessToken({ id: newUser.user_id });
@@ -299,31 +294,22 @@ const verifyOtpController = async (req, res, next) => {
         }
 
 
-        // FIND OTP
-        const otpRow = await db.query.otpsTable.findFirst({
-            where: eq(otpsTable.user_id, user.user_id),
-        });
+        // get otp from redis cache
+        const cachedOtp = await getCache(`otp:verify:${user.user_id}`);
+
+        if (!cachedOtp || cachedOtp !== otp) {
+            throw new Error("Otp Invalid or expired!");
+        }
 
 
-        if (!otpRow) return res.status(400).json({ success: false, message: "OTP not found" });
-        if (otpRow.expires_at < new Date()) return res.status(400).json({ success: false, message: "OTP expired" });
-        if (otpRow.otp !== otp) return res.status(400).json({ success: false, message: "Invalid OTP" });
+        // UPDATE USER VERIFIED
+        await db.update(usersTable)
+            .set({ isVerified: true })
+            .where(eq(usersTable.user_id, user.user_id));
 
 
-        // OTP VERIFIED - UPDATE USER & DELETE OTP
-        await db.transaction(async (tx) => {
-
-            // UPDATE USER VERIFIED
-            await tx.update(usersTable)
-                .set({ isVerified: true })
-                .where(eq(usersTable.user_id, user.user_id));
-
-
-            // DELETE OTP AFTER VERIFICATION
-            await tx.delete(otpsTable).where(eq(otpsTable.user_id, user.user_id));
-
-        })
-
+        await deleteCache(`otp:verify:${user.user_id}`);
+        
         return res.status(200).json({
             success: true,
             message: "OTP verified successfully!"
@@ -357,21 +343,14 @@ const resendOtpController = async (req, res, next) => {
             return res.status(400).json({ success: false, message: "User not found" });
         }
 
-        // DELETE OLD OTPS
-        await db.delete(otpsTable).where(eq(otpsTable.user_id, user.user_id));
-
 
         // GENERATE NEW OTP
         const otp = generateOtp();
 
 
-        // INSERT NEW OTP
-        await db.insert(otpsTable).values({
-            user_id: user.user_id,
-            otp_type: "verify",
-            otp,
-            expires_at: new Date(Date.now() + 5 * 60 * 1000), // 5 min expiry
-        });
+        // set cahce in redis 
+        const cacheKey = `otp:verify:${user.user_id}`;
+        await setCache(cacheKey, otp, 300);
 
 
         // SEND EMAIL
@@ -486,18 +465,11 @@ const requestResetOtpController = async (req, res, next) => {
         if (!user) { return res.status(400).json({ success: false, message: "User not found" }); }
 
 
-        // DELETE OLD OTPS
-        await db.delete(otpsTable).where(eq(otpsTable.user_id, user.user_id));
-
-
-        // GENERATE OTP + SAVE IN DB
+        // GENERATE OTP + SAVE IN REDIS
         const otp = generateOtp();
 
-        await db.insert(otpsTable).values({
-            user_id: user.user_id,
-            otp_type: "reset",
-            otp, expires_at: new Date(Date.now() + 5 * 60 * 1000),
-        });
+        const cacheKey = `otp:reset:${user.user_id}`;
+        await setCache(cacheKey, otp, 300); // 5min
 
 
         // SEND EMAIL
@@ -533,15 +505,12 @@ const verifyResetOtpController = async (req, res, next) => {
         if (!user) return res.status(400).json({ success: false, message: "User not found" });
 
 
-        // CHECK OTP IN DB + VALIDATE
-        const otpRow = await db.query.otpsTable.findFirst({
-            where: eq(otpsTable.user_id, user.user_id),
-        });
+        // CHECK OTP FROM REDIS
+        const cachedOtp = await getCache(`otp:reset:${user.user_id}`);
 
-
-        if (!otpRow) return res.status(400).json({ success: false, message: "OTP not found" });
-        if (otpRow.expires_at < new Date()) return res.status(400).json({ success: false, message: "OTP expired" });
-        if (otpRow.otp !== otp) return res.status(400).json({ success: false, message: "Invalid OTP" });
+        if (!cachedOtp || cachedOtp !== otp) {
+            return res.status(400).json({ success: false, message: "OTP invalid or expired" });
+        }
 
         // OTP verified → allow password reset
         return res.status(200).json({ success: true, message: "OTP verified, you can reset password now" });
@@ -580,12 +549,11 @@ const resetPasswordController = async (req, res, next) => {
             .where(eq(usersTable.user_id, user.user_id));
 
 
-
         // SEND EMAIL
         await sendEmail("passwordUpdate", email, user.name, {});
 
-        // DELTE OTPS
-        await db.delete(otpsTable).where(eq(otpsTable.user_id, user.user_id));
+        // DELETE OTP FROM REDIS
+        await deleteCache(`otp:reset:${user.user_id}`);
 
         return res.status(200).json({ success: true, message: "Password reset successfully" });
 
@@ -601,6 +569,13 @@ const resetPasswordController = async (req, res, next) => {
 // LOGOUT CONTROLLER
 const logoutController = async (req, res, next) => {
     try {
+
+
+        const { user_id: userId } = req.user;
+
+
+        // delete user cache from redis
+        await deleteCache(`user:${userId}`);
 
         // CLEAR COOKIE
         res.clearCookie("refreshToken", {

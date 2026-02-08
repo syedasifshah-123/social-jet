@@ -1,4 +1,4 @@
-import { act, useState } from "react";
+import { useState } from "react";
 import CreatePostCard from "@/components/posts/CreatePostCard";
 import FollowingPostsList from "@/components/posts/FollowingPostsList";
 import ForYouPostsList from "@/components/posts/ForYouPostsList";

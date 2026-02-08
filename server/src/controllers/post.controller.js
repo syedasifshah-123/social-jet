@@ -9,6 +9,7 @@ import { bookmarksTable } from "../db/schema/Bookmarks.js";
 import { notifyFollowers } from "../utils/notificationHelper.js";
 import { commentsTable } from "../db//schema/Comments.js";
 import { postViewsTable } from "../db/schema/PostViews.js"
+import { deleteCacheByPattern, getCache, setCache } from "../utils/cacheHelper.js";
 
 
 
@@ -24,6 +25,24 @@ const getAllForYouPostsController = async (req, res, next) => {
         const limit = parseInt(req.query.limit) || 10;
         const offset = (page - 1) * limit;
 
+
+        // cache key for redis
+        const cacheKey = `feed:${userId}:foryou:page:${page}:limit:${limit}`;
+        let feedPosts = await getCache(cacheKey);
+
+
+        if (feedPosts) {
+            return res.status(200).json({
+                success: true,
+                data: feedPosts,
+                cached: true,
+                nextPage: feedPosts.length === limit ? page + 1 : null
+            });
+        }
+
+        console.log(feedPosts);
+
+        // IF CACHE MISS THEN DB QUERY
 
         // 1. Following IDs fetch karein
         const followingData = await db
@@ -43,7 +62,7 @@ const getAllForYouPostsController = async (req, res, next) => {
 
 
         // 2. Feed Posts with Likes Count and IsLiked Status
-        const feedPosts = await db
+        feedPosts = await db
             .select({
                 post_id: postsTable.post_id,
                 content: postsTable.content,
@@ -96,9 +115,14 @@ const getAllForYouPostsController = async (req, res, next) => {
             .limit(limit)
             .offset(offset);
 
+
+        // SAVE IN REDIS FOR 3 MIN
+        await setCache(cacheKey, feedPosts, 180);
+
         res.status(200).json({
             success: true,
             data: feedPosts,
+            cached: false,
             nextPage: feedPosts.length === limit ? page + 1 : null
         });
 
@@ -125,6 +149,21 @@ const getAllFollowingPostsController = async (req, res, next) => {
         const offset = (page - 1) * limit;
 
 
+        // REDIS CACHE KEY
+        const cacheKey = `feed:${userId}:following:page:${page}:limit:${limit}`;
+        let feedPosts = await getCache(cacheKey);
+
+
+        if (feedPosts) {
+            return res.status(200).json({
+                success: true,
+                data: feedPosts,
+                cached: true,
+                nextPage: feedPosts.length === limit ? page + 1 : null
+            });
+        }
+
+
         //  Fetch following ID's
         const followingData = await db
             .select({ followingId: followsTable.following_id })
@@ -146,7 +185,7 @@ const getAllFollowingPostsController = async (req, res, next) => {
         // Only following users post
         const whereClause = inArray(postsTable.user_id, followingIds);
 
-        const feedPosts = await db
+        feedPosts = await db
             .select({
                 post_id: postsTable.post_id,
                 content: postsTable.content,
@@ -195,10 +234,15 @@ const getAllFollowingPostsController = async (req, res, next) => {
             .offset(offset);
 
 
+
+        // SET FEEDS IN REDIS
+        await setCache(cacheKey, feedPosts, 180);
+
         // Response
         res.status(200).json({
             success: true,
             data: feedPosts,
+            cached: false,
             nextPage: feedPosts.length === limit ? page + 1 : null
         });
 
@@ -223,7 +267,22 @@ const getAllExplorePostsController = async (req, res, next) => {
         const offset = (page - 1) * limit;
 
 
-        const explorePosts = await db
+        // CACHE KEY FOR REDIS
+        const cacheKey = `feed:${userId}:explore:page:${page}:limit:${limit}`;
+        let explorePosts = await getCache(cacheKey);
+
+
+        // if data in redis then get from redis
+        if (explorePosts) {
+            return res.status(200).json({
+                success: true,
+                data: explorePosts,
+                cached: true,
+                nextPage: explorePosts.length === limit ? page + 1 : null
+            });
+        }
+
+        explorePosts = await db
             .select({
                 post_id: postsTable.post_id,
                 content: postsTable.content,
@@ -275,9 +334,14 @@ const getAllExplorePostsController = async (req, res, next) => {
             .limit(limit)
             .offset(offset);
 
+
+        // CACHE DATA IN REDIS
+        await setCache(cacheKey, explorePosts, 180);
+
         res.status(200).json({
             success: true,
             data: explorePosts,
+            cached: false,
             nextPage: explorePosts.length === limit ? page + 1 : null
         });
 
@@ -364,6 +428,7 @@ const getPostDetailController = async (req, res, next) => {
 
 
 
+
 // CREATE POST CONTROLLER
 const createPostController = async (req, res, next) => {
     try {
@@ -416,6 +481,13 @@ const createPostController = async (req, res, next) => {
             media_type: mediaType,
         }).returning();
 
+
+
+        // DELETE CACHE KEY
+        await deleteCacheByPattern(`feed:${userId}:foryou:*`);
+        await deleteCacheByPattern(`feed:${userId}:following:*`);
+        await deleteCacheByPattern(`feed:${userId}:explore:*`);
+        await deleteCacheByPattern(`feed:${userId}:bookmarks:*`);
 
 
         // get all followers
@@ -472,7 +544,7 @@ const createPostController = async (req, res, next) => {
 const editPostController = async (req, res, next) => {
     try {
 
-        const { id: userId } = req.user;
+        const { user_id: userId } = req.user;
         const { id: postId } = req.params;
         const { content } = req.body;
 
@@ -501,6 +573,13 @@ const editPostController = async (req, res, next) => {
         }).where(eq(postsTable.post_id, postId)).returning();
 
 
+        // DELETE CACHE KEY
+        await deleteCacheByPattern(`feed:${userId}:foryou:*`);
+        await deleteCacheByPattern(`feed:${userId}:following:*`);
+        await deleteCacheByPattern(`feed:${userId}:explore:*`);
+        await deleteCacheByPattern(`feed:${userId}:bookmarks:*`);
+
+
         res.status(201).json({
             success: true,
             message: "Post updated successfull!"
@@ -521,7 +600,7 @@ const deletePostController = async (req, res, next) => {
     try {
 
 
-        const { id: userId } = req.user;
+        const { user_id: userId } = req.user;
         const { id: postId } = req.params;
 
 
@@ -533,6 +612,13 @@ const deletePostController = async (req, res, next) => {
 
 
         await db.delete(postsTable).where(eq(postsTable.post_id, postId));
+
+
+        // DELETE CACHE KEY
+        await deleteCacheByPattern(`feed:${userId}:foryou:*`);
+        await deleteCacheByPattern(`feed:${userId}:following:*`);
+        await deleteCacheByPattern(`feed:${userId}:explore:*`);
+        await deleteCacheByPattern(`feed:${userId}:bookmarks:*`);
 
 
         res.status(201).json({

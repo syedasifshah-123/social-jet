@@ -140,9 +140,8 @@ const ExplorePage = () => {
             </div>
 
             {/* Content Section */}
-            <div className="mt-4">
-                <ExplorePostsList />
-            </div>
+            <ExplorePostsList />    
+
         </div>
     );
 };
