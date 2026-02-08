@@ -61,7 +61,7 @@ const ConnectPeople = () => {
                         if (p.isFollowing === true) return null;
 
                         return (
-                            <div key={p.id} className={`w-full flex items-center justify-between gap-3 px-4 py-3 hover:bg-(--hover)/40 cursor-pointer transition-all border-(--input-border) ${idx === 0 ? "border-t" : "border-b"}`}>
+                            <div key={p.id} className={`w-full flex items-center justify-between gap-3 px-4 py-3 hover:bg-(--hover)/40 cursor-pointer transition-all border-(--input-border) ${idx === 0 ? "border-t border-b" : "border-b"}`}>
 
                                 {/* Avatar and username */}
                                 <div className="flex items-center gap-2" onClick={() => router.push(`/${p.username}`)}>

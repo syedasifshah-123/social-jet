@@ -1,6 +1,6 @@
 import express from "express";
 import { authMiddleware } from "../middlewares/auth.middleware.js";
-import { createPostController, getPostDetailController, editPostController, deletePostController, getAllForYouPostsController, getAllFollowingPostsController, getAllExplorePostsController } from "../controllers/post.controller.js";
+import { createPostController, getPostDetailController, editPostController, deletePostController, getAllForYouPostsController, getAllFollowingPostsController, getAllExplorePostsController, trackPostViewController } from "../controllers/post.controller.js";
 import { upload } from "../config/multer.js";
 
 
@@ -15,3 +15,4 @@ postRoutes.get("/:id/detail", authMiddleware, getPostDetailController);
 postRoutes.post("/create", authMiddleware, upload.single("media"), createPostController);
 postRoutes.put("/:id/edit", authMiddleware, upload.single("media"), editPostController);
 postRoutes.delete("/:id/delete", authMiddleware, deletePostController);
+postRoutes.post('/:postId/view', authMiddleware, trackPostViewController);

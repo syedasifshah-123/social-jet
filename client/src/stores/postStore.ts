@@ -29,26 +29,9 @@ export type PostCardProps = {
     isBookmarked: boolean;
     commentsCount: number;
     isCommented: boolean;
+    viewsCount: number;
 };
 
-
-// export type SinglePost = {
-//     post_id: string;
-//     content: string;
-//     media_url: string | null;
-//     created_at: Date;
-//     likesCount: number;
-//     isLiked: boolean;
-//     bookmarkCount: number;
-//     isBookmarked: boolean;
-//     commentsCount: number;
-//     isCommented: boolean;
-//     user: {
-//         name: string,
-//         username: string,
-//         avatar: string | null
-//     }
-// }
 
 
 
@@ -103,7 +86,7 @@ export const usePostStore = create<PostState>((set, get) => ({
 
     // GET POST DETAIL ACTION
     getPostDetail: async (postId: string): Promise<void> => {
-        set({ isLoading: true });
+        set({ isPostLoading: true });
         try {
 
             const response = await api.get(`/posts/${postId}/detail`);
@@ -119,7 +102,7 @@ export const usePostStore = create<PostState>((set, get) => ({
             showToast({ type: "error", message: err?.response?.data?.message });
             console.log(err);
         } finally {
-            set({ isLoading: false });
+            set({ isPostLoading: false });
         }
     },
 
@@ -294,6 +277,7 @@ export const usePostStore = create<PostState>((set, get) => ({
         set((state: any) => ({
             forYouPosts: [newPost, ...state.forYouPosts],
         }));
-    }
+    },
+
 
 }));

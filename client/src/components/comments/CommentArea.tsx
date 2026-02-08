@@ -23,6 +23,13 @@ const CommentArea = ({ isOpen, onClose, postId, onCommentAdded, onCommentDeleted
 
     // get comments
     const { isLoading, getComments, commentsCount, postComment, isCommentPosting, editComment } = useCommentStore();
+    const [localCommentsCount, setLocalCommentsCount] = useState<number>(0);
+
+
+    useEffect(() => {
+        setLocalCommentsCount(commentsCount);
+    }, [commentsCount]);
+
 
     useEffect(() => {
         if (isOpen && postId) {
@@ -42,6 +49,13 @@ const CommentArea = ({ isOpen, onClose, postId, onCommentAdded, onCommentDeleted
         setCommentContent(content);
     };
 
+
+
+    // comment delete handler
+    const handleCommentDelete = () => {
+        setLocalCommentsCount(prev => prev - 1);
+        onCommentDeleted?.();
+    };
 
 
     // comment submit
@@ -64,7 +78,8 @@ const CommentArea = ({ isOpen, onClose, postId, onCommentAdded, onCommentDeleted
 
                 await postComment(postId, commentContent);
                 setCommentContent("");
-                onCommentAdded();
+                setLocalCommentsCount(prev => prev + 1);
+                onCommentAdded?.();
 
             }
 
@@ -116,11 +131,11 @@ const CommentArea = ({ isOpen, onClose, postId, onCommentAdded, onCommentDeleted
 
         {/* Comments area */}
         <div className="overflow-y-auto h-[calc(100vh-200px)] custom-scrollbar mt-4">
-            {isLoading ?(
-                <Loader className="animate-spin mx-auto mt-10" color="var(--button-bg)"/>
+            {isLoading ? (
+                <Loader className="animate-spin mx-auto mt-10" color="var(--button-bg)" />
             ) : (
                 <CommentCard
-                    onCommentDeleted={onCommentDeleted}
+                    onCommentDeleted={handleCommentDelete}
                     onEditClick={handleEditClick}
                 />
             )}

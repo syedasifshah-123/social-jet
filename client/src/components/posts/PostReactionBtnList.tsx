@@ -1,16 +1,23 @@
 "use client";
 
 
-import { Bookmark, Heart, MessageCircle, Share } from "lucide-react";
+import { Bookmark, Eye, Heart, MessageCircle, Share } from "lucide-react";
 import CommentDrawer from "../comments/CommentDrawer";
 import { useLikeStore } from "@/stores/likeStore";
 import { useBookmarkStore } from "@/stores/bookmarkStore";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { PostCardProps } from "@/stores/postStore";
+import { useNumberToKilo } from "@/hooks/useNumberToKilo";
 
 
+interface PostReactionBtnListProps {
+    post: PostCardProps,
+    onCommentAdded: () => void;
+    onCommentDeleted: () => void;
+}
 
-const PostReactionBtnList = ({ post }: { post: PostCardProps }) => {
+
+const PostReactionBtnList = ({ post, onCommentAdded, onCommentDeleted }: PostReactionBtnListProps) => {
 
     const { likePost, unLikePost } = useLikeStore();
     const { savePost, unSavePost } = useBookmarkStore();
@@ -26,6 +33,10 @@ const PostReactionBtnList = ({ post }: { post: PostCardProps }) => {
     // comments count
     const [commentsCount, setCommentsCount] = useState<number>(post.commentsCount);
 
+
+    useEffect(() => {
+        setCommentsCount(post.commentsCount);
+    }, [post.commentsCount]);
 
 
     // local bookmark states
@@ -54,7 +65,6 @@ const PostReactionBtnList = ({ post }: { post: PostCardProps }) => {
             if (!success) throw new Error();
 
         } catch (err) {
-            // Rollback agar fail ho jaye
             setLiked(originalLiked);
             setCount(originalCount);
         } finally {
@@ -90,6 +100,11 @@ const PostReactionBtnList = ({ post }: { post: PostCardProps }) => {
         }
 
     }
+
+
+    // count format
+    const format = useNumberToKilo();
+
 
     return (<>
 
@@ -131,9 +146,25 @@ const PostReactionBtnList = ({ post }: { post: PostCardProps }) => {
                 isOpen={isDrawerOpen}
                 onClose={() => setIsDrawerOpen(false)}
                 postId={post.post_id}
-                onCommentAdded={() => setCommentsCount(prev => prev + 1)}
-                onCommentDeleted={() => setCommentsCount(prev => prev - 1)}
+                onCommentAdded={() => {
+                    setCommentsCount(prev => prev + 1);
+                }}
+                onCommentDeleted={() => {
+                    setCommentsCount(prev => prev - 1);
+                }}
             />
+
+
+            {/* Bookmark Button */}
+            <div
+                className={`group flex items-center gap-1 cursor-pointer transition-all`}>
+                <div className="w-8 h-8 flex items-center justify-center rounded-full group-hover:bg-orange-500/10 transition-all">
+                    <Eye
+                        size={18}
+                    />
+                </div>
+                <span className="text-xs">{post.viewsCount > 0 ? format(post.viewsCount) : ""}</span>
+            </div>
 
 
             {/* Bookmark Button */}

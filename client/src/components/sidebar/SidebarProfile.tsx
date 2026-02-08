@@ -65,7 +65,7 @@ const SidebarProfile = () => {
             {/* --- Profile Trigger --- */}
             <div
                 onClick={() => { setIsOpen(!isOpen); setMenuView("main"); }}
-                className="flex items-center gap-3 ps-2 pr-4 py-1.5 w-max rounded-full hover:bg-(--hover) cursor-pointer transition-all"
+                className="flex items-center gap-3 ps-2 pr-4 py-1.5 w-max rounded-full hover:bg-(--hover) hover:pr-2 cursor-pointer transition-all sm:ml-1"
             >
                 <Avatar userAvatar={user?.avatar} />
                 <div className="flex-1 max-xl:hidden">

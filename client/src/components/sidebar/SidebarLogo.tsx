@@ -8,7 +8,7 @@ const SidebarLogo = () => {
 
     return (<>
 
-        <div className="w-7.5 h-7.5 mt-5 mb-8 ms-2">
+        <div className="w-7.5 h-7.5 mt-5 mb-8 ms-2 sm:ml-4">
             <Image
                 src={logoSrc}
                 className=""

@@ -5,15 +5,36 @@ import Link from "next/link";
 import { useTimeAgo } from "@/hooks/useTimeAgo";
 import Image from "next/image";
 import PostReactionBtnList from "./PostReactionBtnList";
+import { useState } from "react";
+import { usePostView } from "@/hooks/usePostView";
+
+
+interface PostCardExtralProps {
+    post: PostCardProps,
+    onCommentAdded: () => void;
+    onCommentDeleted: () => void;
+}
 
 
 
-const PostCard = ({ post }: { post: PostCardProps }) => {
+const PostCard = ({ post }: PostCardExtralProps) => {
 
     const router = useRouter();
 
+    const [localViewCount, setLocalViewCount] = useState(post.viewsCount);
+
+    // ✅ STEP 7B: Use view tracking hook
+    const { elementRef } = usePostView({
+        postId: post.post_id,
+        onView: () => {
+            // ✅ Optimistic update - increment view count
+            setLocalViewCount(prev => prev + 1);
+        },
+        enabled: true
+    });
+
     return (
-        <div className="border-b border-(--input-border) hover:bg-(--hover)/50 transition cursor-pointer">
+        <div className="border-b border-(--input-border) hover:bg-(--hover)/50 transition cursor-pointer" ref={elementRef}>
 
             {/* {Avatar + content} */}
             <div
@@ -59,7 +80,7 @@ const PostCard = ({ post }: { post: PostCardProps }) => {
 
             {/* Post reaction btn */}
             <div className="pl-16 pr-4 pb-2">
-                <PostReactionBtnList post={post} />
+                <PostReactionBtnList post={post} onCommentAdded={() => {}} onCommentDeleted={() => {}} />
             </div>
 
         </div>

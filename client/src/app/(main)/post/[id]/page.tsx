@@ -4,6 +4,7 @@
 import CommentCard from "@/components/comments/CommentCard";
 import FollowButton from "@/components/FollowBtn";
 import PostReactionBtnList from "@/components/posts/PostReactionBtnList";
+import { useNumberToKilo } from "@/hooks/useNumberToKilo";
 import { useCommentStore } from "@/stores/commentStore";
 import { usePostStore } from "@/stores/postStore";
 import { useProfileStore } from "@/stores/profileStore";
@@ -23,12 +24,12 @@ interface PostDetailProps {
 
 
 
-const PostDetail = ({ onCommentDeleted }: PostDetailProps) => {
+const PostDetail = ({ onCommentAdded, onCommentDeleted }: PostDetailProps) => {
 
     const router = useRouter();
 
     const { id } = useParams();
-    const { getPostDetail, post, isLoading } = usePostStore();
+    const { getPostDetail, post, isPostLoading } = usePostStore();
     const { getUserProfile, userProfile } = useProfileStore();
 
 
@@ -51,6 +52,7 @@ const PostDetail = ({ onCommentDeleted }: PostDetailProps) => {
     }, [post?.user?.username, getUserProfile]);
 
 
+
     // date format
     const formattedDate = post?.created_at ? new Intl.DateTimeFormat('en-US', {
         hour: 'numeric',
@@ -66,6 +68,14 @@ const PostDetail = ({ onCommentDeleted }: PostDetailProps) => {
 
     // Comment logic
     const { getComments, commentsCount, postComment, isCommentPosting, editComment } = useCommentStore();
+    const [localCommentsCount, setLocalCommentsCount] = useState<number>(0);
+
+
+    // sync comments count from store
+    useEffect(() => {
+        setLocalCommentsCount(commentsCount);
+    }, [commentsCount]);
+
 
     useEffect(() => {
         if (post?.post_id) {
@@ -74,11 +84,21 @@ const PostDetail = ({ onCommentDeleted }: PostDetailProps) => {
     }, [post?.post_id, getComments]);
 
 
-
     // Edit mode activate karne ka function
     const handleEditClick = (id: string, content: string) => {
         setEditingCommentId(id);
         setCommentContent(content);
+    };
+
+
+
+    // notify parent
+    const handleCommentAdded = () => {
+        setLocalCommentsCount(prev => prev + 1);
+    };
+
+    const handleCommentDeleted = () => {
+        setLocalCommentsCount(prev => prev - 1);
     };
 
 
@@ -114,6 +134,11 @@ const PostDetail = ({ onCommentDeleted }: PostDetailProps) => {
     }
 
 
+
+    // counting format
+    const format = useNumberToKilo();
+
+
     return (<>
 
         <div className="min-h-screen bg-(--bg-color) text-(--text-color)">
@@ -133,7 +158,7 @@ const PostDetail = ({ onCommentDeleted }: PostDetailProps) => {
 
 
             {/* Post detail */}
-            {isLoading ? (
+            {isPostLoading ? (
                 <Loader className="animate-spin mx-auto mt-10" color="var(--button-bg)" />
             ) : (<>
 
@@ -189,7 +214,7 @@ const PostDetail = ({ onCommentDeleted }: PostDetailProps) => {
                     <div className="flex items-center gap-1 mt-4 px-1 text-[15px] text-(--secondary-text) border-b border-(--input-border) pb-4">
                         <span>{formattedDate}</span>
                         <span>·</span>
-                        <span className="text-(--text-color) font-bold">2.4M</span>
+                            <span className="text-(--text-color) font-bold">{format(post?.viewsCount as number)}</span>
                         <span className="ml-0.5">Views</span>
                     </div>
 
@@ -199,7 +224,14 @@ const PostDetail = ({ onCommentDeleted }: PostDetailProps) => {
                 {/* Reaction buttons */}
                 <div className="px-5 -mt-1.25 border-b border-(--input-border) pb-3.5">
                     {post && (
-                        <PostReactionBtnList post={post} />
+                        <PostReactionBtnList
+                            post={{
+                                ...post,
+                                commentsCount: localCommentsCount
+                            }}
+                            onCommentAdded={handleCommentAdded}
+                            onCommentDeleted={handleCommentDeleted}
+                        />
                     )}
                 </div>
 
@@ -209,8 +241,8 @@ const PostDetail = ({ onCommentDeleted }: PostDetailProps) => {
                 <div className="p-5">
 
                     {/* Heading */}
-                    <h2 className="text-xl font-bold text-(--text-color)">{commentsCount}
-                        {commentsCount > 1 || commentsCount == 0 ? " Comments" : " Comment"}
+                    <h2 className="text-xl font-bold text-(--text-color)">{localCommentsCount}
+                        {localCommentsCount > 1 || localCommentsCount == 0 ? " Comments" : " Comment"}
                     </h2>
 
 

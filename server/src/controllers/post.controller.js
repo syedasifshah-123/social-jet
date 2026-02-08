@@ -1,4 +1,4 @@
-import { eq, inArray, desc, notInArray, ne, or, sql } from "drizzle-orm";
+import { eq, inArray, desc, notInArray, ne, or, sql, and } from "drizzle-orm";
 import { db } from "../db/config.js";
 import { followsTable } from "../db/schema/Follows.js";
 import { postsTable } from "../db/schema/Posts.js";
@@ -8,6 +8,7 @@ import { likesTable } from "../db/schema/Likes.js";
 import { bookmarksTable } from "../db/schema/Bookmarks.js";
 import { notifyFollowers } from "../utils/notificationHelper.js";
 import { commentsTable } from "../db//schema/Comments.js";
+import { postViewsTable } from "../db/schema/PostViews.js"
 
 
 
@@ -53,6 +54,10 @@ const getAllForYouPostsController = async (req, res, next) => {
                     username: usersTable.username,
                     avatar: profilesTable.avatar,
                 },
+
+                // Views count
+                viewsCount: postsTable.views_count,
+
                 // LIKES COUNT
                 likesCount: sql` (
                     SELECT count(*) FROM ${likesTable} 
@@ -147,6 +152,10 @@ const getAllFollowingPostsController = async (req, res, next) => {
                 content: postsTable.content,
                 media_url: postsTable.media_url,
                 created_at: postsTable.created_at,
+
+                // Views count
+                viewsCount: postsTable.views_count,
+
                 likesCount: sql` (
                     SELECT count(*) FROM ${likesTable} 
                     WHERE ${likesTable.post_id} = ${postsTable.post_id}
@@ -220,6 +229,11 @@ const getAllExplorePostsController = async (req, res, next) => {
                 content: postsTable.content,
                 media_url: postsTable.media_url,
                 created_at: postsTable.created_at,
+
+
+                // Views count
+                viewsCount: postsTable.views_count,
+
                 likesCount: sql` (
                     SELECT count(*) FROM ${likesTable} 
                     WHERE ${likesTable.post_id} = ${postsTable.post_id}
@@ -291,6 +305,9 @@ const getPostDetailController = async (req, res, next) => {
                 content: postsTable.content,
                 media_url: postsTable.media_url,
                 created_at: postsTable.created_at,
+
+                // Views count
+                viewsCount: postsTable.views_count,
 
                 likesCount: sql` (
                     SELECT count(*) FROM ${likesTable} 
@@ -533,6 +550,92 @@ const deletePostController = async (req, res, next) => {
 
 
 
+// TRACK POST VIEW CONTROLLER
+const trackPostViewController = async (req, res, next) => {
+    try {
+
+        const { postId: post_id } = req.params;
+        const { user_id: userId } = req.user;
+
+
+        // Check if post exists
+        const post = await db
+            .select({ user_id: postsTable.user_id })
+            .from(postsTable)
+            .where(eq(postsTable.post_id, post_id))
+            .limit(1);
+
+        if (!post.length) {
+            return res.status(404).json({
+                success: false,
+                message: 'Post not found'
+            });
+        }
+
+        // Don't count own posts
+        if (post[0].user_id === userId) {
+            return res.status(200).json({
+                success: true,
+                message: 'Own post - view not counted'
+            });
+        }
+
+        // Check if already viewed in last 24 hours
+        const existingView = await db
+            .select()
+            .from(postViewsTable)
+            .where(
+                and(
+                    eq(postViewsTable.post_id, post_id),
+                    eq(postViewsTable.user_id, userId),
+                    sql`${postViewsTable.viewed_at} > NOW() - INTERVAL '24 hours'`
+                )
+            )
+            .limit(1);
+
+        if (existingView.length > 0) {
+            return res.status(200).json({
+                success: true,
+                message: 'Already viewed in last 24 hours'
+            });
+        }
+
+        // Get IP and User Agent (optional)
+        const ipAddress = req.ip ||
+            req.headers['x-forwarded-for'] ||
+            req.connection.remoteAddress;
+        const userAgent = req.headers['user-agent'];
+
+        // Insert view record
+        await db.insert(postViewsTable).values({
+            post_id,
+            user_id: userId,
+            ip_address: ipAddress,
+            user_agent: userAgent,
+        });
+
+        // Increment views_count in posts table
+        await db
+            .update(postsTable)
+            .set({
+                views_count: sql`${postsTable.views_count} + 1`
+            })
+            .where(eq(postsTable.post_id, post_id));
+
+        res.status(200).json({
+            success: true,
+            message: 'View tracked successfully'
+        });
+
+    } catch (err) {
+        console.error("Track View Error:", err);
+        next(err);
+    }
+};
+
+
+
+
 
 export {
     getAllForYouPostsController,
@@ -541,5 +644,6 @@ export {
     getPostDetailController,
     createPostController,
     editPostController,
-    deletePostController
+    deletePostController,
+    trackPostViewController
 };

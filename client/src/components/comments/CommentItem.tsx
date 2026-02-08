@@ -87,7 +87,7 @@ const CommentItem = ({ comment, isFirst, onCommentDeleted, onEditClick }: Commen
                                         onClick={() => {
                                             deleteComment(comment?.id);
                                             setShowMenu(false);
-                                            onCommentDeleted();
+                                            onCommentDeleted;
                                         }}
                                     >
                                         <Trash2 size={14} /> Delete

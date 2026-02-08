@@ -22,7 +22,7 @@ const HomeFeed = () => {
                 >
                     For you
                     {activeTab === "forYou" && (
-                        <span className="absolute bottom-0 left-1/2 -translate-x-1/2 h-1 w-16 bg-(--button-bg) rounded-full" />
+                        <span className="absolute bottom-0 left-1/2 -translate-x-1/2 h-1 w-16 bg-(--button-bg) rounded-tl-xl rounded-tr-2xl" />
                     )}
                 </button>
 
@@ -32,7 +32,7 @@ const HomeFeed = () => {
                 >
                     Following
                     {activeTab === "following" && (
-                        <span className="absolute bottom-0 left-1/2 -translate-x-1/2 h-1 w-20 bg-(--button-bg) rounded-full" />
+                        <span className="absolute bottom-0 left-1/2 -translate-x-1/2 h-1 w-20 bg-(--button-bg) rounded-tl-xl rounded-tr-2xl" />
                     )}
 
                 </button>
